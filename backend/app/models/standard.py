@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, Date
-
+from pgvector.sqlalchemy import Vector
 from app.database import Base
 
 
@@ -25,3 +25,5 @@ class Standard(Base):
     status = Column(String(50), default="Active")
 
     source_url = Column(Text, nullable=True)
+
+    embedding = Column(Vector(384), nullable=True)

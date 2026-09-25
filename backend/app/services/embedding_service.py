@@ -1,0 +1,14 @@
+from sentence_transformers import SentenceTransformer
+
+MODEL_NAME = "intfloat/multilingual-e5-small"
+
+model = SentenceTransformer(MODEL_NAME)
+
+
+def generate_embedding(text: str):
+    embedding = model.encode(
+        text,
+        normalize_embeddings=True
+    )
+
+    return embedding.tolist()
