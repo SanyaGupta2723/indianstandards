@@ -7,6 +7,9 @@ from app.database import engine, Base
 from app.models.standard import Standard
 from app.routes.search import router as search_router
 from app.routes.recommendations import router as recommendations_router
+from app.models.standard_relationship import StandardRelationship
+from app.routes.relationships import router as relationships_router
+
 
 app = FastAPI(
     title="Indian Standards AI",
@@ -31,6 +34,7 @@ app.include_router(standards_router)
 app.include_router(search_router)
 app.include_router(requirements_router)
 app.include_router(recommendations_router)
+app.include_router(relationships_router)
 
 
 @app.get("/")
