@@ -13,6 +13,8 @@ from app.models.standard_version import StandardVersion
 from app.models.amendment import Amendment
 from app.routes.versions import router as versions_router
 from app.routes.amendments import router as amendments_router
+from app.models.certification import Certification
+from app.routes.certification import router as certifications_router
 
 app = FastAPI(
     title="Indian Standards AI",
@@ -40,6 +42,7 @@ app.include_router(recommendations_router)
 app.include_router(relationships_router)
 app.include_router(versions_router)
 app.include_router(amendments_router)
+app.include_router(certifications_router)
 
 
 @app.get("/")
