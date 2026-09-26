@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from app.routes.standards import router as standards_router
-
+from app.routes.requirements import router as requirements_router
 from app.database import engine, Base
 from app.models.standard import Standard
 from app.routes.search import router as search_router
@@ -29,6 +29,7 @@ app.add_middleware(
 )
 app.include_router(standards_router)
 app.include_router(search_router)
+app.include_router(requirements_router)
 
 
 @app.get("/")
