@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+
 import {
   Bell, BookOpen, Bookmark, ChevronDown, ChevronRight, ClipboardList, Clock3,
   Download, FileText, FolderOpen, Globe2, Home, LayoutDashboard, Menu, MoreHorizontal,
@@ -51,11 +52,116 @@ function Header({ setOpen }: { setOpen: (x: boolean) => void }) { return <header
 
 function Hero() { return <section className="relative overflow-hidden rounded-lg bg-[#0a2a50] px-6 py-7 text-white shadow-sm sm:px-9 sm:py-8"><div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(115deg, transparent 50%, #75a5d4 50%, transparent 51%), linear-gradient(75deg, transparent 70%, #75a5d4 70%, transparent 71%)', backgroundSize: '120px 120px, 180px 180px' }} /><div className="relative max-w-2xl"><div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.18em] text-[#f4c75b]"><Sparkles size={14} /> Procurement intelligence platform</div><h1 className="max-w-xl text-2xl font-semibold leading-tight tracking-tight sm:text-[30px]">Turn Procurement Requirements<br className="hidden sm:block" /> into the Right Indian Standards</h1><p className="mt-3 max-w-xl text-sm leading-relaxed text-blue-100">AI-powered recommendations to help you create accurate, compliant and high-quality tender specifications.</p></div><div className="absolute bottom-0 right-8 hidden h-28 w-44 opacity-25 lg:block"><div className="absolute bottom-0 h-20 w-44 border-x-8 border-t-8 border-white" /><div className="absolute bottom-0 left-7 h-28 w-5 border-x-4 border-t-4 border-white" /><div className="absolute bottom-0 right-8 h-24 w-5 border-x-4 border-t-4 border-white" /></div></section> }
 
-function InputCard({ onSearch }: { onSearch: () => void }) { const [tab, setTab] = useState('Text Input'); const [text, setText] = useState('Procurement of high-voltage transformers for 132/33 kV substation, oil-immersed type, with cooling arrangement, suitable for continuous operation, including testing and installation requirements.'); return <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="flex items-center justify-between"><div><div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">Step 01</div><h2 className="mt-1 text-lg font-semibold text-[#102b4d]">Provide Your Requirement</h2></div><span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">DRAFT</span></div><div className="mt-5 flex items-center justify-between"><label className="text-xs font-semibold text-slate-700">Input language</label><select className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"><option>English</option><option>Hindi</option></select></div><div className="mt-4 flex border-b border-slate-200">{['Text Input','Upload Document','Voice Input'].map(x => <button key={x} onClick={() => setTab(x)} className={`mr-5 border-b-2 pb-2 text-xs font-semibold transition ${tab === x ? 'border-[#1d67ad] text-[#1d67ad]' : 'border-transparent text-slate-400 hover:text-slate-700'}`}>{x}</button>)}</div>{tab === 'Text Input' ? <><div className="mt-4 rounded border border-slate-200 focus-within:border-[#3c82c4] focus-within:ring-2 focus-within:ring-blue-100"><textarea value={text} onChange={e => setText(e.target.value)} className="h-32 w-full resize-none bg-transparent p-3 text-[13px] leading-relaxed text-slate-700 outline-none" placeholder="Describe your procurement requirement in simple words…" /><div className="flex justify-end px-3 pb-2 text-[10px] text-slate-400">{text.length}/2000</div></div><div className="mt-4 flex flex-wrap items-center gap-2"><span className="mr-1 text-[11px] font-semibold text-slate-500">Try an example</span>{['LED street light','Water pump','Solar panel','Transformer','Cement','More'].map(x => <button key={x} className="rounded-full border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 transition hover:border-blue-300 hover:bg-blue-50">{x}</button>)}</div></> : <div className="mt-4 grid h-44 place-items-center rounded border border-dashed border-slate-300 bg-slate-50 text-center"><UploadCloud className="text-[#3978b7]" size={28} /><div className="mt-2 text-sm font-semibold text-slate-700">Drag & drop your tender document here</div><div className="mt-1 text-[11px] text-slate-500">PDF, DOCX, TXT · Max 10 MB</div><button className="mt-3 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Browse Files</button></div>}<div className="mt-5 flex items-center gap-3 rounded border border-emerald-100 bg-emerald-50/60 p-3"><div className="grid h-8 w-8 place-items-center rounded bg-white text-emerald-600"><FileCheck2 size={17} /></div><div className="min-w-0 flex-1"><div className="truncate text-xs font-semibold text-slate-700">Transformer_Tender_Specs.pdf</div><div className="text-[10px] text-slate-500">2.4 MB · Uploaded successfully</div></div><CheckCircle2 size={16} className="text-emerald-600" /></div><button className="mt-5 flex items-center gap-1 text-xs font-semibold text-[#2464a5] hover:underline"><SlidersHorizontal size={14} /> Advanced Options <ChevronDown size={13} /></button><button onClick={onSearch} className="mt-5 flex w-full items-center justify-center gap-2 rounded bg-[#1767aa] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#125a96] focus:outline-none focus:ring-2 focus:ring-blue-300">Find Relevant Standards <ArrowUpRight size={16} /></button></div> }
+function InputCard({
+  onSearch,
+}: {
+  onSearch: (text: string) => void
+}) {const [tab, setTab] = useState('Text Input'); const [text, setText] = useState('Procurement of high-voltage transformers for 132/33 kV substation, oil-immersed type, with cooling arrangement, suitable for continuous operation, including testing and installation requirements.'); return <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="flex items-center justify-between"><div><div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">Step 01</div><h2 className="mt-1 text-lg font-semibold text-[#102b4d]">Provide Your Requirement</h2></div><span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">DRAFT</span></div><div className="mt-5 flex items-center justify-between"><label className="text-xs font-semibold text-slate-700">Input language</label><select className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"><option>English</option><option>Hindi</option></select></div><div className="mt-4 flex border-b border-slate-200">{['Text Input','Upload Document','Voice Input'].map(x => <button key={x} onClick={() => setTab(x)} className={`mr-5 border-b-2 pb-2 text-xs font-semibold transition ${tab === x ? 'border-[#1d67ad] text-[#1d67ad]' : 'border-transparent text-slate-400 hover:text-slate-700'}`}>{x}</button>)}</div>{tab === 'Text Input' ? <><div className="mt-4 rounded border border-slate-200 focus-within:border-[#3c82c4] focus-within:ring-2 focus-within:ring-blue-100"><textarea value={text} onChange={e => setText(e.target.value)} className="h-32 w-full resize-none bg-transparent p-3 text-[13px] leading-relaxed text-slate-700 outline-none" placeholder="Describe your procurement requirement in simple words…" /><div className="flex justify-end px-3 pb-2 text-[10px] text-slate-400">{text.length}/2000</div></div><div className="mt-4 flex flex-wrap items-center gap-2"><span className="mr-1 text-[11px] font-semibold text-slate-500">Try an example</span>{['LED street light','Water pump','Solar panel','Transformer','Cement','More'].map(x => <button key={x} className="rounded-full border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 transition hover:border-blue-300 hover:bg-blue-50">{x}</button>)}</div></> : <div className="mt-4 grid h-44 place-items-center rounded border border-dashed border-slate-300 bg-slate-50 text-center"><UploadCloud className="text-[#3978b7]" size={28} /><div className="mt-2 text-sm font-semibold text-slate-700">Drag & drop your tender document here</div><div className="mt-1 text-[11px] text-slate-500">PDF, DOCX, TXT · Max 10 MB</div><button className="mt-3 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Browse Files</button></div>}<div className="mt-5 flex items-center gap-3 rounded border border-emerald-100 bg-emerald-50/60 p-3"><div className="grid h-8 w-8 place-items-center rounded bg-white text-emerald-600"><FileCheck2 size={17} /></div><div className="min-w-0 flex-1"><div className="truncate text-xs font-semibold text-slate-700">Transformer_Tender_Specs.pdf</div><div className="text-[10px] text-slate-500">2.4 MB · Uploaded successfully</div></div><CheckCircle2 size={16} className="text-emerald-600" /></div><button className="mt-5 flex items-center gap-1 text-xs font-semibold text-[#2464a5] hover:underline"><SlidersHorizontal size={14} /> Advanced Options <ChevronDown size={13} /></button><button onClick={() => onSearch(text)} className="mt-5 flex w-full items-center justify-center gap-2 rounded bg-[#1767aa] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#125a96] focus:outline-none focus:ring-2 focus:ring-blue-300">Find Relevant Standards <ArrowUpRight size={16} /></button></div> }
 
 function FeatureCards() { return <div className="grid gap-3 sm:grid-cols-3">{[[Lightbulb,'AI Understanding','Understands context, not just keywords'],[GitCompareArrows,'Allied Standards','Finds related, normative and cross-referenced standards'],[ShieldCheck,'Latest & Compliant','Checks latest versions and certification requirements']].map(([I,t,d]) => <div key={t as string} className="rounded-lg border border-slate-200 bg-white p-4"><I size={17} className="text-[#2a73b5]" /><div className="mt-3 text-xs font-bold text-[#173452]">{t as string}</div><div className="mt-1 text-[11px] leading-relaxed text-slate-500">{d as string}</div></div>)}</div> }
 
-function Results({ onDetails, saved, setSaved }: { onDetails: () => void; saved: boolean; setSaved: (x: boolean) => void }) { const [open, setOpen] = useState<number | null>(0); return <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">Step 02</div><h2 className="mt-1 text-lg font-semibold text-[#102b4d]">Recommended Standards</h2><p className="mt-1 text-xs text-slate-500">8 standards matched to your procurement requirement</p></div><div className="flex gap-2"><button className="hidden items-center gap-1 rounded border border-slate-200 px-2.5 py-2 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 sm:flex"><Download size={14} /> Download Report</button><button onClick={() => setSaved(!saved)} className={`flex items-center gap-1 rounded border px-2.5 py-2 text-[11px] font-semibold ${saved ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}><Bookmark size={14} /> {saved ? 'Saved' : 'Save to List'}</button></div></div><div className="mt-5 flex gap-5 overflow-x-auto border-b border-slate-200 whitespace-nowrap">{['All Results (8)','Product Standards (3)','Safety (2)','Testing (2)','Related (1)'].map((x,i) => <button key={x} className={`border-b-2 pb-2 text-[11px] font-semibold ${i === 0 ? 'border-[#1767aa] text-[#1767aa]' : 'border-transparent text-slate-400'}`}>{x}</button>)}</div><div className="mt-5 rounded border border-blue-100 bg-[#f7fbff] p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-base font-bold text-[#133a67]">IS 1180 (Part 1): 2021</div><div className="mt-1 text-xs text-slate-600">Power Transformers — Part 1: General Requirements</div><div className="mt-3 flex flex-wrap gap-2"><Badge green>Latest Version</Badge><Badge>Mandatory BIS ISI Mark</Badge></div></div><button onClick={onDetails} className="flex items-center gap-1 text-xs font-bold text-[#1767aa] hover:underline">View Details <ChevronRight size={14} /></button></div><div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded border border-slate-200 bg-slate-200 sm:grid-cols-4">{[['Category','Product Standard'],['Edition','2021'],['Status','Current'],['Amendments','Amendment 1 (2023)']].map(([a,b]) => <div key={a} className="bg-white p-3"><div className="text-[10px] text-slate-400">{a}</div><div className="mt-1 text-[11px] font-semibold text-slate-700">{b}</div></div>)}</div>{sections.map((s,i) => <div key={s.title} className="mt-3 overflow-hidden rounded border border-slate-200 bg-white"><button onClick={() => setOpen(open === i ? null : i)} className="flex w-full items-center gap-3 p-3 text-left"><div className="grid h-6 w-6 place-items-center rounded bg-blue-50 text-[#2866a3]"><ChevronRight size={14} className={`transition-transform ${open === i ? 'rotate-90' : ''}`} /></div><div className="flex-1"><div className="text-xs font-semibold text-slate-700">{s.title} <span className="text-slate-400">({s.count})</span></div><div className="mt-0.5 text-[10px] text-slate-400">{s.sub}</div></div></button>{open === i && <div className="border-t border-slate-100 px-3 pb-3 pt-1">{s.content.map(([a,b]) => <div key={a} className="border-b border-slate-100 py-2 last:border-0"><div className="text-[11px] font-semibold text-[#2464a5]">{a}</div><div className="mt-0.5 text-[10px] leading-relaxed text-slate-500">{b}</div></div>)}</div>}</div>)}</div></div> }
+function Results({
+  onDetails,
+  saved,
+  setSaved,
+  recommendations,
+}: {
+  onDetails: (standard: any) => void
+  saved: boolean
+  setSaved: (x: boolean) => void
+  recommendations: any[]
+}) { const [open, setOpen] = useState<number | null>(0); return <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">Step 02</div><h2 className="mt-1 text-lg font-semibold text-[#102b4d]">Recommended Standards</h2><p className="mt-1 text-xs text-slate-500">
+  {recommendations.length} standards matched to your procurement requirement
+</p></div>
+<div className="mt-5 space-y-4">
+  {recommendations.length === 0 ? (
+    <div className="rounded border border-slate-200 bg-slate-50 p-6 text-center">
+      <div className="text-sm font-semibold text-slate-600">
+        No standards found yet
+      </div>
+      <div className="mt-1 text-xs text-slate-400">
+        Enter a procurement requirement and search.
+      </div>
+    </div>
+  ) : (
+    recommendations.map((standard) => (
+      <div
+        key={standard.id}
+        className="rounded border border-blue-100 bg-[#f7fbff] p-4"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="text-base font-bold text-[#133a67]">
+              {standard.is_number}
+            </div>
+
+            <div className="mt-1 text-xs text-slate-600">
+              {standard.title}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Badge green>
+                Match {(standard.match_score * 100).toFixed(0)}%
+              </Badge>
+
+              {standard.certifications?.length > 0 && (
+                <Badge>Certification</Badge>
+              )}
+
+              {standard.qcos?.length > 0 && (
+                <Badge>QCO</Badge>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={() => onDetails(standard)}
+            className="flex items-center gap-1 text-xs font-bold text-[#1767aa] hover:underline"
+          >
+            View Details
+            <ChevronRight size={14} />
+          </button>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded border border-slate-200 bg-slate-200 sm:grid-cols-4">
+          {[
+            ["Category", standard.category || "—"],
+            ["Edition", standard.edition || "—"],
+            ["Status", standard.status || "—"],
+            ["Amendments", String(standard.amendments?.length || 0)],
+          ].map(([a, b]) => (
+            <div key={a} className="bg-white p-3">
+              <div className="text-[10px] text-slate-400">{a}</div>
+              <div className="mt-1 text-[11px] font-semibold text-slate-700">
+                {b}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 rounded border border-slate-200 bg-white p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Why AI recommended this
+          </div>
+
+          <div className="mt-2 space-y-1">
+            {(standard.match_reasons || []).map(
+              (reason: string) => (
+                <div
+                  key={reason}
+                  className="text-[11px] text-slate-600"
+                >
+                  • {reason}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    ))
+  )}
+</div>
+{sections.map((s,i) => <div key={s.title} className="mt-3 overflow-hidden rounded border border-slate-200 bg-white"><button onClick={() => setOpen(open === i ? null : i)} className="flex w-full items-center gap-3 p-3 text-left"><div className="grid h-6 w-6 place-items-center rounded bg-blue-50 text-[#2866a3]"><ChevronRight size={14} className={`transition-transform ${open === i ? 'rotate-90' : ''}`} /></div><div className="flex-1"><div className="text-xs font-semibold text-slate-700">{s.title} <span className="text-slate-400">({s.count})</span></div><div className="mt-0.5 text-[10px] text-slate-400">{s.sub}</div></div></button>{open === i && <div className="border-t border-slate-100 px-3 pb-3 pt-1">{s.content.map(([a,b]) => <div key={a} className="border-b border-slate-100 py-2 last:border-0"><div className="text-[11px] font-semibold text-[#2464a5]">{a}</div><div className="mt-0.5 text-[10px] leading-relaxed text-slate-500">{b}</div></div>)}</div>}</div>)}</div></div> }
 
 function DetailsDrawer({ close }: { close: () => void }) { return <><button aria-label="Close details" onClick={close} className="fixed inset-0 z-40 bg-[#092445]/30" /><aside className="fixed inset-y-0 right-0 z-50 w-full max-w-[480px] overflow-y-auto bg-white shadow-2xl"><div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-5"><div><div className="text-[10px] font-bold uppercase tracking-[.16em] text-[#3470b5]">Standard details</div><div className="mt-1 text-lg font-bold text-[#102b4d]">IS 1180 (Part 1): 2021</div></div><button onClick={close} className="rounded p-2 text-slate-400 hover:bg-slate-100"><X size={18} /></button></div><div className="space-y-6 p-6"><div><div className="text-sm font-semibold text-slate-800">Power Transformers — Part 1: General Requirements</div><div className="mt-3 flex gap-2"><Badge green>Current</Badge><Badge>Latest Version</Badge></div></div><div className="rounded border border-blue-100 bg-blue-50/70 p-4"><div className="flex items-center gap-2 text-xs font-bold text-[#1c5e9d]"><Sparkles size={15} /> Why AI recommended this standard</div><p className="mt-2 text-xs leading-relaxed text-slate-600">This standard matches the product type, voltage range, transformer application and technical requirements identified from the submitted specification.</p></div>{[['Scope','Covers general requirements for oil-immersed power transformers used in transmission and distribution systems.'],['Applicability','132/33 kV substation, continuous operation and associated installation requirements.'],['Edition & status','Edition 2021 · Current · Amendment 1 (2023)'],['Certification requirements','BIS ISI Mark indicated for applicable products. Verify current certification requirements before tender publication.'],['Testing requirements','Routine, type and special tests for transformer performance, insulation and short-circuit withstand.'],['Official source / reference link','bis.gov.in/standards — prototype reference link']].map(([a,b]) => <div key={a} className="border-b border-slate-100 pb-4"><div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{a}</div><div className="mt-1 text-xs leading-relaxed text-slate-700">{b}</div></div>)}<div className="flex gap-2"><button className="flex-1 rounded bg-[#1767aa] py-2.5 text-xs font-semibold text-white hover:bg-[#125a96]">Save Standard</button><button className="flex-1 rounded border border-slate-200 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Add to Comparison</button></div><div className="rounded bg-amber-50 p-3 text-[10px] leading-relaxed text-amber-800">Demo interface: standard metadata and certification details shown here are mock data for demonstration and should not be treated as authoritative.</div></div></aside></> }
 
