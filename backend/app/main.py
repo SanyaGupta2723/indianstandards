@@ -15,6 +15,10 @@ from app.routes.versions import router as versions_router
 from app.routes.amendments import router as amendments_router
 from app.models.certification import Certification
 from app.routes.certification import router as certifications_router
+from app.models.qco import QCO
+from app.routes.qco import router as qcos_router
+
+
 
 app = FastAPI(
     title="Indian Standards AI",
@@ -43,7 +47,7 @@ app.include_router(relationships_router)
 app.include_router(versions_router)
 app.include_router(amendments_router)
 app.include_router(certifications_router)
-
+app.include_router(qcos_router)
 
 @app.get("/")
 def root():
