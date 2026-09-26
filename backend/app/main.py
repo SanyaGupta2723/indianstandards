@@ -6,7 +6,7 @@ from app.routes.requirements import router as requirements_router
 from app.database import engine, Base
 from app.models.standard import Standard
 from app.routes.search import router as search_router
-
+from app.routes.recommendations import router as recommendations_router
 
 app = FastAPI(
     title="Indian Standards AI",
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(standards_router)
 app.include_router(search_router)
 app.include_router(requirements_router)
+app.include_router(recommendations_router)
 
 
 @app.get("/")
