@@ -23,51 +23,35 @@ def calculate_requirement_match(candidate, extracted):
     # ==================================================
     # 1. PRODUCT MATCH
     # ==================================================
-
     product = extracted.get("product")
 
     if product:
         product_lower = product.lower()
-
         if product_lower in combined_text:
             score += 0.20
-
-            reasons.append(
-                f"Product relevance: {product}"
-            )
+            reasons.append(f"Product relevance: {product}")
 
     # ==================================================
     # 2. CATEGORY MATCH
     # ==================================================
-
     category_req = extracted.get("category")
 
     if category_req:
         if category_req.lower() in combined_text:
             score += 0.10
-
-            reasons.append(
-                f"Category match: {category_req}"
-            )
+            reasons.append(f"Category match: {category_req}")
 
     # ==================================================
     # 3. GENERAL REQUIREMENTS
     # ==================================================
-
-    requirements = extracted.get(
-        "requirements",
-        []
-    )
+    requirements = extracted.get("requirements", [])
 
     if requirements:
-
         matched_requirements = 0
 
         for requirement in requirements:
-
             requirement_lower = requirement.lower()
 
-            # Flexible matching
             if (
                 requirement_lower in combined_text
                 or (
@@ -79,68 +63,44 @@ def calculate_requirement_match(candidate, extracted):
                     and "install" in combined_text
                 )
             ):
-
                 matched_requirements += 1
-
-                reasons.append(
-                    f"Requirement match: {requirement}"
-                )
+                reasons.append(f"Requirement match: {requirement}")
 
         if matched_requirements:
-
             score += 0.15 * (
-                matched_requirements
-                / len(requirements)
+                matched_requirements / len(requirements)
             )
 
     # ==================================================
     # 4. TECHNICAL PARAMETERS
     # ==================================================
-
-    technical_parameters = extracted.get(
-        "technical_parameters",
-        []
-    )
+    technical_parameters = extracted.get("technical_parameters", [])
 
     if technical_parameters:
-
         matched_parameters = 0
 
         for parameter in technical_parameters:
-
             parameter_clean = parameter.lower()
 
             if parameter_clean in combined_text:
-
                 matched_parameters += 1
-
                 reasons.append(
                     f"Technical parameter match: {parameter}"
                 )
 
         score += 0.10 * (
-            matched_parameters
-            / len(technical_parameters)
+            matched_parameters / len(technical_parameters)
         )
 
     # ==================================================
     # 5. TRANSFORMER TYPE
     # ==================================================
-
-    transformer_type = extracted.get(
-        "transformer_type"
-    )
+    transformer_type = extracted.get("transformer_type")
 
     if transformer_type:
-
         transformer_type_lower = transformer_type.lower()
 
-        # ----------------------------------------------
-        # Oil immersed
-        # ----------------------------------------------
-
         if transformer_type_lower == "oil-immersed":
-
             if (
                 "oil-immersed" in combined_text
                 or "oil immersed" in combined_text
@@ -149,204 +109,179 @@ def calculate_requirement_match(candidate, extracted):
                 or "liquid-immersed" in combined_text
                 or "liquid immersed" in combined_text
             ):
-
                 score += 0.20
-
                 reasons.append(
                     "Transformer type match: oil-immersed"
                 )
-
-            # Explicit dry-type mismatch
             elif (
                 "dry-type" in combined_text
                 or "dry type" in combined_text
             ):
-
                 score -= 0.25
-
                 reasons.append(
                     "Type mismatch: dry-type transformer"
                 )
 
-        # ----------------------------------------------
-        # Dry type
-        # ----------------------------------------------
-
         elif transformer_type_lower == "dry-type":
-
             if (
                 "dry-type" in combined_text
                 or "dry type" in combined_text
             ):
-
                 score += 0.20
-
                 reasons.append(
                     "Transformer type match: dry-type"
                 )
-
             elif (
                 "oil-immersed" in combined_text
                 or "oil immersed" in combined_text
             ):
-
                 score -= 0.20
-
                 reasons.append(
                     "Type mismatch: oil-immersed transformer"
                 )
 
     # ==================================================
-    # 6. VOLTAGE
+    # 6. VOLTAGE APPLICABILITY
     # ==================================================
-
     voltage = extracted.get("voltage")
 
     if voltage:
+        import re
 
-        voltage_clean = voltage.lower().replace(
-            " ",
-            ""
-        )
-
-        candidate_clean = combined_text.replace(
-            " ",
-            ""
-        )
-
-        if voltage_clean in candidate_clean:
-
-            score += 0.10
-
-            reasons.append(
-                f"Voltage match: {voltage}"
+        # Example: "132/33 kV" -> [132, 33]
+        required_voltages = [
+            float(value)
+            for value in re.findall(
+                r"\d+(?:\.\d+)?",
+                voltage
             )
+        ]
+
+        # Example: "up to 33 kV" -> 33
+        scope_voltage_matches = re.findall(
+            r"(?:up\s+to|upto|up-to)\s+"
+            r"(\d+(?:\.\d+)?)\s*kV",
+            scope,
+            flags=re.IGNORECASE
+        )
+
+        candidate_max_voltage = None
+
+        if scope_voltage_matches:
+            candidate_max_voltage = max(
+                float(value)
+                for value in scope_voltage_matches
+            )
+
+        if candidate_max_voltage is not None and required_voltages:
+            highest_required_voltage = max(required_voltages)
+
+            if highest_required_voltage <= candidate_max_voltage:
+                score += 0.10
+                reasons.append(
+                    f"Voltage applicability match: required up to "
+                    f"{highest_required_voltage:g} kV, standard covers up to "
+                    f"{candidate_max_voltage:g} kV"
+                )
+            else:
+                score -= 0.30
+                reasons.append(
+                    f"Voltage applicability mismatch: required "
+                    f"{highest_required_voltage:g} kV, candidate covers only up to "
+                    f"{candidate_max_voltage:g} kV"
+                )
+        else:
+            # No explicit voltage limit in candidate scope.
+            # Do not penalize automatically.
+            voltage_clean = voltage.lower().replace(" ", "")
+            candidate_clean = combined_text.replace(" ", "")
+
+            if voltage_clean in candidate_clean:
+                score += 0.10
+                reasons.append(f"Voltage match: {voltage}")
 
     # ==================================================
     # 7. COOLING
     # ==================================================
-
     if extracted.get("cooling_required"):
-
         if "cooling" in combined_text:
-
             score += 0.07
-
-            reasons.append(
-                "Cooling requirement relevance"
-            )
+            reasons.append("Cooling requirement relevance")
 
     # ==================================================
     # 8. CONTINUOUS OPERATION
     # ==================================================
-
     if extracted.get("continuous_operation"):
-
         if (
             "continuous" in combined_text
             or "loading" in combined_text
             or "service" in combined_text
         ):
-
             score += 0.05
-
-            reasons.append(
-                "Continuous operation relevance"
-            )
+            reasons.append("Continuous operation relevance")
 
     # ==================================================
     # 9. TESTING
     # ==================================================
-
     if extracted.get("testing_required"):
-
         if (
             "test" in title
             or "testing" in title
             or "test" in scope
             or "testing" in scope
         ):
-
             score += 0.10
-
-            reasons.append(
-                "Testing relevance"
-            )
+            reasons.append("Testing relevance")
 
     # ==================================================
     # 10. INSTALLATION
     # ==================================================
-
     if extracted.get("installation_required"):
-
         if (
             "installation" in combined_text
             or "install" in combined_text
             or "commissioning" in combined_text
         ):
-
             score += 0.08
-
-            reasons.append(
-                "Installation relevance"
-            )
+            reasons.append("Installation relevance")
 
     # ==================================================
     # 11. SUBSTATION APPLICATION
     # ==================================================
-
     application = extracted.get("application")
 
     if application:
-
         if application.lower() in combined_text:
-
             score += 0.05
-
-            reasons.append(
-                f"Application relevance: {application}"
-            )
+            reasons.append(f"Application relevance: {application}")
 
     # ==================================================
     # 12. TRANSFORMER CATEGORY
     # ==================================================
-
     if (
-        "transformer" in str(
-            extracted.get("product") or ""
-        ).lower()
+        "transformer" in str(extracted.get("product") or "").lower()
         and "transformer" in combined_text
     ):
-
         score += 0.05
+        reasons.append("Transformer category relevance")
 
-        reasons.append(
-            "Transformer category relevance"
-        )
-
-            # ==================================================
-    # PRIMARY VS SUPPORTING STANDARD
     # ==================================================
-
+    # 13. PRIMARY VS SUPPORTING STANDARD
+    # ==================================================
     standard_type = (
         candidate.get("standard_type") or ""
     ).lower()
 
     standard_title = title.lower()
 
-    # Primary/general/product standards
     if (
         "general" in standard_title
         or "general requirements" in standard_title
         or "product standard" in standard_type
     ):
         score += 0.12
+        reasons.append("Primary product standard relevance")
 
-        reasons.append(
-            "Primary product standard relevance"
-        )
-
-    # Supporting/application standards
     if (
         "application guide" in standard_type
         or "loading guide" in standard_title
@@ -354,33 +289,20 @@ def calculate_requirement_match(candidate, extracted):
         or "installation" in standard_title
     ):
         score -= 0.05
-
-        reasons.append(
-            "Supporting/application standard"
-        )
+        reasons.append("Supporting/application standard")
 
     # ==================================================
-    # 13. SEMANTIC SCORE
+    # 14. SEMANTIC SCORE
     # ==================================================
-
-    semantic_score = candidate.get(
-        "semantic_score",
-        0.0
-    )
-
+    semantic_score = candidate.get("semantic_score", 0.0)
     score += 0.15 * semantic_score
 
     # ==================================================
-    # FINAL SCORE
+    # 15. FINAL SCORE
     # ==================================================
-
-    score = max(
-        0.0,
-        min(score, 1.0)
-    )
+    score = max(0.0, min(score, 1.0))
 
     return score, reasons
-
 
 def get_standard_context(
     standard_id: int,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import {
   Bell,
@@ -366,17 +366,49 @@ function Hero() {
 
 function InputCard({
   onSearch,
+  onUpload,
 }: {
   onSearch: (text: string) => void
+  onUpload: (file: File) => void
 }) {
   const [tab, setTab] = useState('Text Input')
-
   const [text, setText] = useState(
     'Procurement of high-voltage transformers for 132/33 kV substation, oil-immersed type, with cooling arrangement, suitable for continuous operation, including testing and installation requirements.'
   )
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleFileSelect = (file: File) => {
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Please select a PDF file.')
+      return
+    }
+
+    setSelectedFile(file)
+  }
+
+  const handleBrowse = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleSubmit = () => {
+    if (tab === 'Upload Document') {
+      if (!selectedFile) {
+        alert('Please select a PDF document first.')
+        return
+      }
+
+      onUpload(selectedFile)
+      return
+    }
+
+    onSearch(text)
+  }
+
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
       <div className="flex items-center justify-between">
         <div>
           <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
@@ -405,7 +437,7 @@ function InputCard({
       </div>
 
       <div className="mt-4 flex border-b border-slate-200">
-        {['Text Input', 'Upload Document', 'Voice Input'].map((x) => (
+        {['Text Input', 'Upload Document', 'Voice Input'].map(x => (
           <button
             key={x}
             onClick={() => setTab(x)}
@@ -425,7 +457,7 @@ function InputCard({
           <div className="mt-4 rounded border border-slate-200 focus-within:border-[#3c82c4] focus-within:ring-2 focus-within:ring-blue-100">
             <textarea
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={e => setText(e.target.value)}
               className="h-32 w-full resize-none bg-transparent p-3 text-[13px] leading-relaxed text-slate-700 outline-none"
               placeholder="Describe your procurement requirement in simple words…"
             />
@@ -447,9 +479,10 @@ function InputCard({
               'Transformer',
               'Cement',
               'More',
-            ].map((x) => (
+            ].map(x => (
               <button
                 key={x}
+                onClick={() => setText(x)}
                 className="rounded-full border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 transition hover:border-blue-300 hover:bg-blue-50"
               >
                 {x}
@@ -457,53 +490,106 @@ function InputCard({
             ))}
           </div>
         </>
+      ) : tab === 'Upload Document' ? (
+        <>
+          <div
+            onClick={handleBrowse}
+            className="mt-4 grid h-44 cursor-pointer place-items-center rounded border border-dashed border-slate-300 bg-slate-50 text-center transition hover:border-blue-400 hover:bg-blue-50/30"
+          >
+            <div>
+              <UploadCloud
+                className="mx-auto text-[#3978b7]"
+                size={28}
+              />
+
+              <div className="mt-2 text-sm font-semibold text-slate-700">
+                Drag & drop your tender document here
+              </div>
+
+              <div className="mt-1 text-[11px] text-slate-500">
+                PDF · Max 10 MB
+              </div>
+
+              <button
+                type="button"
+                onClick={e => {
+                  e.stopPropagation()
+                  handleBrowse()
+                }}
+                className="mt-3 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              >
+                Browse Files
+              </button>
+            </div>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            className="hidden"
+            onChange={e => {
+              const file = e.target.files?.[0]
+
+              if (file) {
+                handleFileSelect(file)
+              }
+            }}
+          />
+
+          {selectedFile && (
+            <div className="mt-4 flex items-center gap-3 rounded border border-emerald-100 bg-emerald-50/60 p-3">
+              <div className="grid h-8 w-8 place-items-center rounded bg-white text-emerald-600">
+                <FileCheck2 size={17} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs font-semibold text-slate-700">
+                  {selectedFile.name}
+                </div>
+
+                <div className="text-[10px] text-slate-500">
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB · Ready for analysis
+                </div>
+              </div>
+
+              <CheckCircle2
+                size={16}
+                className="text-emerald-600"
+              />
+            </div>
+          )}
+        </>
       ) : (
         <div className="mt-4 grid h-44 place-items-center rounded border border-dashed border-slate-300 bg-slate-50 text-center">
-          <UploadCloud className="text-[#3978b7]" size={28} />
+          <div>
+            <div className="text-sm font-semibold text-slate-700">
+              Voice input
+            </div>
 
-          <div className="mt-2 text-sm font-semibold text-slate-700">
-            Drag & drop your tender document here
+            <div className="mt-1 text-[11px] text-slate-500">
+              Voice input will be available in the next version.
+            </div>
           </div>
-
-          <div className="mt-1 text-[11px] text-slate-500">
-            PDF, DOCX, TXT · Max 10 MB
-          </div>
-
-          <button className="mt-3 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">
-            Browse Files
-          </button>
         </div>
       )}
 
-      <div className="mt-5 flex items-center gap-3 rounded border border-emerald-100 bg-emerald-50/60 p-3">
-        <div className="grid h-8 w-8 place-items-center rounded bg-white text-emerald-600">
-          <FileCheck2 size={17} />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-xs font-semibold text-slate-700">
-            Transformer_Tender_Specs.pdf
-          </div>
-
-          <div className="text-[10px] text-slate-500">
-            2.4 MB · Uploaded successfully
-          </div>
-        </div>
-
-        <CheckCircle2 size={16} className="text-emerald-600" />
-      </div>
-
-      <button className="mt-5 flex items-center gap-1 text-xs font-semibold text-[#2464a5] hover:underline">
+      <button
+        className="mt-5 flex items-center gap-1 text-xs font-semibold text-[#2464a5] hover:underline"
+      >
         <SlidersHorizontal size={14} />
         Advanced Options
         <ChevronDown size={13} />
       </button>
 
       <button
-        onClick={() => onSearch(text)}
+        onClick={handleSubmit}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded bg-[#1767aa] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#125a96] focus:outline-none focus:ring-2 focus:ring-blue-300"
       >
-        Find Relevant Standards
+        {tab === 'Upload Document'
+          ? 'Analyze Tender Document'
+          : 'Find Relevant Standards'}
+
         <ArrowUpRight size={16} />
       </button>
     </div>
@@ -1044,6 +1130,50 @@ export default function Page() {
     }
   }
 
+  const doUpload = async (file: File) => {
+  setProcessing(true)
+  setSearched(false)
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch(
+      'http://127.0.0.1:8000/api/upload/pdf/recommend',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    )
+
+    const data = await response.json()
+
+    console.log('PDF AI Recommendation Response:', data)
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.detail || 'PDF recommendation failed'
+      )
+    }
+
+    setRecommendations(data.recommendations || [])
+    setSearched(true)
+
+  } catch (error) {
+    console.error('PDF upload error:', error)
+    setRecommendations([])
+    setSearched(true)
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : 'Failed to analyze PDF'
+    )
+  } finally {
+    setProcessing(false)
+  }
+}
+
   const handleDetails = (standard: any) => {
     setSelectedStandard(standard)
     setDrawer(true)
@@ -1088,7 +1218,10 @@ export default function Page() {
 
               <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(350px,0.9fr)_minmax(560px,1.35fr)]">
                 <div className="space-y-4">
-                  <InputCard onSearch={doSearch} />
+                 <InputCard
+  onSearch={doSearch}
+  onUpload={doUpload}
+/>
                   <FeatureCards />
                 </div>
 
