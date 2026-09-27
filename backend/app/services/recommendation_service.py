@@ -324,6 +324,41 @@ def calculate_requirement_match(candidate, extracted):
             "Transformer category relevance"
         )
 
+            # ==================================================
+    # PRIMARY VS SUPPORTING STANDARD
+    # ==================================================
+
+    standard_type = (
+        candidate.get("standard_type") or ""
+    ).lower()
+
+    standard_title = title.lower()
+
+    # Primary/general/product standards
+    if (
+        "general" in standard_title
+        or "general requirements" in standard_title
+        or "product standard" in standard_type
+    ):
+        score += 0.12
+
+        reasons.append(
+            "Primary product standard relevance"
+        )
+
+    # Supporting/application standards
+    if (
+        "application guide" in standard_type
+        or "loading guide" in standard_title
+        or "code of practice" in standard_type
+        or "installation" in standard_title
+    ):
+        score -= 0.05
+
+        reasons.append(
+            "Supporting/application standard"
+        )
+
     # ==================================================
     # 13. SEMANTIC SCORE
     # ==================================================
@@ -543,7 +578,42 @@ def generate_recommendations(
         )
     )
 
-    search_query = " ".join(search_parts)
+    # -------------------------
+    # Transformer-specific search
+    # -------------------------
+
+    if extracted.get("transformer_type"):
+        search_parts.append(
+            extracted["transformer_type"]
+        )
+
+    if extracted.get("application"):
+        search_parts.append(
+            extracted["application"]
+        )
+
+    if extracted.get("voltage"):
+        search_parts.append(
+            extracted["voltage"]
+        )
+
+    if extracted.get("cooling_required"):
+        search_parts.append(
+            "cooling"
+        )
+
+    if extracted.get("continuous_operation"):
+        search_parts.append(
+            "continuous operation"
+        )
+
+    # -------------------------
+    # Create final search query
+    # -------------------------
+
+    search_query = " ".join(
+        search_parts
+    )
 
     if not search_query.strip():
         search_query = text
@@ -559,18 +629,16 @@ def generate_recommendations(
     )
 
     # -------------------------
-    # 4. Reranking
+    # 4. Calculate final scores
     # -------------------------
 
     reranked = []
 
     for candidate in candidates:
 
-        final_score, reasons = (
-            calculate_requirement_match(
-                candidate,
-                extracted
-            )
+        final_score, reasons = calculate_requirement_match(
+            candidate,
+            extracted
         )
 
         # Get additional standard information
@@ -632,7 +700,7 @@ def generate_recommendations(
         })
 
     # -------------------------
-    # 5. Sort recommendations
+    # 5. Sort by final score
     # -------------------------
 
     reranked.sort(
@@ -640,10 +708,13 @@ def generate_recommendations(
         reverse=True
     )
 
+    # -------------------------
+    # 6. Return top results
+    # -------------------------
+
     recommendations = reranked[:limit]
 
     return {
-
         "query": text,
 
         "extracted_requirements": extracted,
