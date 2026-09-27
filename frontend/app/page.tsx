@@ -644,11 +644,13 @@ function Results({
   saved,
   setSaved,
   recommendations,
+  queryText,
 }: {
   onDetails: (standard: any) => void
   saved: boolean
   setSaved: (x: boolean) => void
   recommendations: any[]
+  queryText: string
 }) {
   const [open, setOpen] = useState<number | null>(0)
 
@@ -673,13 +675,47 @@ function Results({
 
       <div className="mt-5 space-y-4">
         {recommendations.length === 0 ? (
-          <div className="rounded border border-slate-200 bg-slate-50 p-6 text-center">
-            <div className="text-sm font-semibold text-slate-600">
-              No standards found yet
-            </div>
+          <div className="rounded border border-blue-100 bg-[#f7fbff] p-5">
+            <div className="flex items-start gap-3">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-50 text-amber-600">
+                <Search size={17} />
+              </div>
 
-            <div className="mt-1 text-xs text-slate-400">
-              Enter a procurement requirement and search.
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-[#163b63]">
+                  No exact standard found in the current AI knowledge base
+                </div>
+
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  We do not want to recommend an unrelated standard. You can search the official BIS catalogue for your requirement instead.
+                </p>
+
+                <div className="mt-3 rounded border border-slate-200 bg-white px-3 py-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    Your search
+                  </div>
+                  <div className="mt-1 truncate text-xs font-medium text-slate-700">
+                    {queryText || 'Procurement requirement'}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const term = queryText?.trim() || 'Indian Standard'
+                    const url = `https://standards.bis.gov.in/website/know-your-standards?searchTerm=${encodeURIComponent(term)}`
+                    window.open(url, '_blank', 'noopener,noreferrer')
+                  }}
+                  className="mt-4 inline-flex items-center gap-2 rounded bg-[#1767aa] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#125a96]"
+                >
+                  <Search size={14} />
+                  Search Official BIS Standards
+                  <ArrowUpRight size={14} />
+                </button>
+
+                <div className="mt-2 text-[10px] text-slate-400">
+                  Opens the official BIS Know Your Standards catalogue in a new tab.
+                </div>
+              </div>
             </div>
           </div>
         ) : (
@@ -765,7 +801,7 @@ function Results({
         )}
       </div>
 
-      {sections.map((s, i) => (
+      {recommendations.length > 0 && sections.map((s, i) => (
         <div
           key={s.title}
           className="mt-3 overflow-hidden rounded border border-slate-200 bg-white"
@@ -1088,6 +1124,7 @@ export default function Page() {
   const [processing, setProcessing] = useState(false)
   const [searched, setSearched] = useState(false)
   const [recommendations, setRecommendations] = useState<any[]>([])
+  const [queryText, setQueryText] = useState('')
 
   const title = useMemo(
     () => (active === 'New Search' ? 'New Search' : active),
@@ -1095,6 +1132,7 @@ export default function Page() {
   )
 
   const doSearch = async (text: string) => {
+    setQueryText(text)
     setProcessing(true)
 
     try {
@@ -1147,6 +1185,8 @@ export default function Page() {
     )
 
     const data = await response.json()
+
+    setQueryText(data.query || data.extracted_requirements?.product || file.name)
 
     console.log('PDF AI Recommendation Response:', data)
 
@@ -1278,6 +1318,7 @@ export default function Page() {
                     saved={saved}
                     setSaved={setSaved}
                     recommendations={recommendations}
+                    queryText={queryText}
                   />
                 </div>
               </div>

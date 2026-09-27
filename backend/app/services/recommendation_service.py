@@ -10,6 +10,56 @@ from app.services.requirement_extraction_service import extract_requirements
 from app.services.hybrid_search_service import hybrid_search
 
 
+PRODUCT_ALIASES = {
+    "transformer": [
+        "transformer",
+        "power transformer",
+        "distribution transformer",
+    ],
+    "cement": [
+        "cement",
+        "portland cement",
+        "pozzolana cement",
+        "opc",
+        "ppc",
+    ],
+    "steel": [
+        "steel",
+        "structural steel",
+        "reinforcement steel",
+        "rebar",
+    ],
+    "water pump": [
+        "pump",
+        "water pump",
+        "centrifugal pump",
+    ],
+    "solar panel": [
+        "solar",
+        "photovoltaic",
+        "pv module",
+        "solar module",
+    ],
+    "electrical appliance": [
+        "electrical appliance",
+        "appliance",
+        "electrical equipment",
+    ],
+    "led street light": [
+        "led street light",
+        "led lighting",
+        "street light",
+        "street lighting",
+        "led lamp",
+    ],
+}
+
+
+def product_aliases_for(product):
+    product_lower = (product or "").lower()
+    return PRODUCT_ALIASES.get(product_lower, [product_lower] if product_lower else [])
+
+
 def calculate_requirement_match(candidate, extracted):
     score = 0.0
     reasons = []
@@ -25,11 +75,21 @@ def calculate_requirement_match(candidate, extracted):
     # ==================================================
     product = extracted.get("product")
 
+    product_match = False
+
     if product:
-        product_lower = product.lower()
-        if product_lower in combined_text:
+        aliases = product_aliases_for(product)
+        product_match = any(alias in combined_text for alias in aliases)
+
+        if product_match:
             score += 0.20
             reasons.append(f"Product relevance: {product}")
+        else:
+            # Strongly penalize standards from an unrelated product domain.
+            score -= 0.45
+            reasons.append(
+                f"Product mismatch: candidate is not for {product}"
+            )
 
     # ==================================================
     # 2. CATEGORY MATCH
@@ -563,6 +623,23 @@ def generate_recommendations(
             extracted
         )
 
+        # --------------------------------------------------
+        # Product-domain gate
+        # If the product is known, do not recommend a
+        # standard from a completely different product domain.
+        # --------------------------------------------------
+        product = extracted.get("product")
+        if product:
+            aliases = product_aliases_for(product)
+            candidate_text = (
+                f"{candidate.get('title') or ''} "
+                f"{candidate.get('scope') or ''} "
+                f"{candidate.get('category') or ''}"
+            ).lower()
+
+            if aliases and not any(alias in candidate_text for alias in aliases):
+                continue
+
         # Get additional standard information
         context = get_standard_context(
             candidate["id"],
@@ -622,7 +699,22 @@ def generate_recommendations(
         })
 
     # -------------------------
-    # 5. Sort by final score
+    # 5. Unknown / uncovered product gate
+    # -------------------------
+    # If requirement extraction cannot identify a supported
+    # product, only return results when semantic/reranked
+    # relevance is reasonably strong. This prevents a query
+    # such as "LED street light" from returning unrelated
+    # transformer standards just because they exist in the DB.
+    if not extracted.get("product"):
+        reranked = [
+            item
+            for item in reranked
+            if item["match_score"] >= 0.40
+        ]
+
+    # -------------------------
+    # 6. Sort by final score
     # -------------------------
 
     reranked.sort(
@@ -631,7 +723,7 @@ def generate_recommendations(
     )
 
     # -------------------------
-    # 6. Return top results
+    # 7. Return top results
     # -------------------------
 
     recommendations = reranked[:limit]
