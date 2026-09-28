@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useMemo ,useEffect, useRef, useState } from 'react'
 import jsPDF from 'jspdf'
 import {
   Bell,
@@ -36,8 +36,6 @@ const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard },
   { label: 'My Documents', icon: FolderOpen },
   { label: 'Saved Standards', icon: Bookmark },
-  { label: 'Comparison', icon: GitCompareArrows },
-  { label: 'Templates', icon: ClipboardList },
   { label: 'Notifications', icon: Bell },
 ]
 
@@ -151,11 +149,13 @@ function Sidebar({
   setActive,
   open,
   setOpen,
+  notificationCount,
 }: {
   active: string
   setActive: (x: string) => void
   open: boolean
   setOpen: (x: boolean) => void
+  notificationCount: number
 }) {
   return (
     <>
@@ -217,9 +217,9 @@ function Sidebar({
 
               {label}
 
-              {label === 'Notifications' && (
+              {label === 'Saved Standards' && notificationCount > 0 && (
                 <span className="ml-auto rounded-full bg-[#e6a82f] px-1.5 py-0.5 text-[9px] font-bold text-[#092445]">
-                  3
+                  {notificationCount}
                 </span>
               )}
             </button>
@@ -260,8 +260,10 @@ function Sidebar({
 
 function Header({
   setOpen,
+  notificationCount,
 }: {
   setOpen: (x: boolean) => void
+  notificationCount: number
 }) {
   return (
     <header className="fixed left-0 right-0 top-0 z-20 flex h-[72px] items-center border-b border-slate-200 bg-white/95 px-4 backdrop-blur lg:left-[246px] lg:px-8">
@@ -293,8 +295,12 @@ function Header({
       </div>
 
       <div className="ml-auto flex items-center gap-2 md:gap-5">
-        <button className="rounded p-2 text-slate-500 hover:bg-slate-100">
+        <button
+          className="relative rounded p-2 text-slate-500 hover:bg-slate-100"
+          aria-label="Notifications"
+        >
           <Bell size={18} />
+
         </button>
 
         <button className="hidden items-center gap-1 text-xs font-medium text-slate-600 sm:flex">
@@ -406,7 +412,7 @@ function InputCard({
     onSearch(text)
   }
 
-  const [isListening, setIsListening] = useState(false);
+  const [isListening, setIsListening] = useState(false)
 
   const handleVoiceInput = () => {
   const SpeechRecognition =
@@ -455,7 +461,7 @@ function InputCard({
       <div className="flex items-center justify-between">
         <div>
           <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
-            Step 01
+            
           </div>
 
           <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">
@@ -708,6 +714,7 @@ function Results({
   onDetails,
   saved,
   setSaved,
+  onSave,
   recommendations,
   queryText,
   searched,
@@ -715,6 +722,7 @@ function Results({
   onDetails: (standard: any) => void
   saved: boolean
   setSaved: (x: boolean) => void
+  onSave: (standard: any) => void
   recommendations: any[]
   queryText: string
   searched: boolean
@@ -729,7 +737,7 @@ if (!searched) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
-        Step 02
+        
       </div>
 
       <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">
@@ -784,7 +792,7 @@ if (!searched) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
-          Step 02
+          
         </div>
 
         <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">
@@ -1184,7 +1192,7 @@ const downloadReport = () => {
 
         <div>
           <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
-            Step 02
+            
           </div>
 
           <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">
@@ -1209,7 +1217,7 @@ const downloadReport = () => {
           </button>
 
           <button
-            onClick={() => setSaved(!saved)}
+            onClick={() => onSave(standard)}
             className={`flex items-center gap-1 rounded border px-2.5 py-2 text-[11px] font-semibold ${
               saved
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
@@ -1723,14 +1731,62 @@ export default function Page() {
   const [searched, setSearched] = useState(false)
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [queryText, setQueryText] = useState('')
+  const [savedStandards, setSavedStandards] = useState<any[]>([])
+  const [notificationCount, setNotificationCount] = useState(0)
+  const [notificationMessage, setNotificationMessage] = useState('')
+
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('savedStandards')
+      const notifications = localStorage.getItem('notificationCount')
+      const message = localStorage.getItem('notificationMessage')
+
+      if (savedData) setSavedStandards(JSON.parse(savedData))
+      if (notifications) setNotificationCount(Number(notifications))
+      if (message) setNotificationMessage(message)
+    } catch (error) {
+      console.error('Failed to load saved data:', error)
+    }
+  }, [])
+
+  const handleSaveStandard = (standard: any) => {
+    if (!standard?.is_number) return
+
+    const alreadySaved = savedStandards.some(
+      item => item.is_number === standard.is_number
+    )
+
+    if (alreadySaved) {
+      setSaved(true)
+      setNotificationMessage(
+        `${standard.is_number} is already saved in My List.`
+      )
+      return
+    }
+
+    const updated = [...savedStandards, standard]
+    const nextNotificationCount = notificationCount + 1
+    const message = `Saved ${standard.is_number} — ${standard.title || 'standard'} to My List.`
+
+    setSavedStandards(updated)
+    setSaved(true)
+    setNotificationCount(nextNotificationCount)
+    setNotificationMessage(message)
+
+    localStorage.setItem('savedStandards', JSON.stringify(updated))
+    localStorage.setItem('notificationCount', String(nextNotificationCount))
+    localStorage.setItem('notificationMessage', message)
+  }
 
   const title = useMemo(
     () => (active === 'New Search' ? 'New Search' : active),
     [active]
   )
 
+
   const doSearch = async (text: string) => {
     setQueryText(text)
+    setSaved(false)
     setProcessing(true)
 
     try {
@@ -1755,7 +1811,18 @@ export default function Page() {
 
       console.log('AI Recommendation Response:', data)
 
-      setRecommendations(data.recommendations || [])
+      const nextRecommendations = data.recommendations || []
+      setRecommendations(nextRecommendations)
+
+      if (
+        nextRecommendations[0] &&
+        savedStandards.some(
+          item => item.is_number === nextRecommendations[0].is_number
+        )
+      ) {
+        setSaved(true)
+      }
+
       setSearched(true)
     } catch (error) {
       console.error('Recommendation error:', error)
@@ -1767,6 +1834,7 @@ export default function Page() {
   }
 
   const doUpload = async (file: File) => {
+  setSaved(false)
   setProcessing(true)
   setSearched(false)
 
@@ -1819,13 +1887,17 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-[#f5f8fb] text-slate-800">
-      <Header setOpen={setNavOpen} />
+      <Header
+        setOpen={setNavOpen}
+        notificationCount={notificationCount}
+      />
 
       <Sidebar
         active={active}
         setActive={setActive}
         open={navOpen}
         setOpen={setNavOpen}
+        notificationCount={notificationCount}
       />
 
       <main className="pt-[72px] lg:pl-[246px]">
@@ -1916,6 +1988,7 @@ export default function Page() {
                     onDetails={handleDetails}
                     saved={saved}
                     setSaved={setSaved}
+                    onSave={handleSaveStandard}
                     recommendations={recommendations}
                     queryText={queryText}
                     searched={searched}
@@ -1931,21 +2004,73 @@ export default function Page() {
                 against official BIS sources before final procurement use.
               </div>
             </>
-          ) : active === 'Comparison' ? (
-            <EmptyPage
-              title="Comparison"
-              icon={GitCompareArrows}
-            />
           ) : active === 'My Documents' ? (
             <EmptyPage
               title="My Documents"
               icon={FolderOpen}
             />
           ) : active === 'Saved Standards' ? (
-            <EmptyPage
-              title="Saved Standards"
-              icon={Bookmark}
-            />
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
+                Workspace
+              </div>
+              <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">Saved Standards</h2>
+              <p className="mt-1 text-xs text-slate-500">Standards you saved from your procurement searches</p>
+
+              {savedStandards.length === 0 ? (
+                <div className="mt-6 rounded border border-blue-100 bg-[#f7fbff] p-8 text-center">
+                  <Bookmark size={28} className="mx-auto text-[#3470b5]" />
+                  <div className="mt-3 text-sm font-semibold text-[#163b63]">No saved standards yet</div>
+                  <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-slate-500">
+                    Search for a procurement requirement and click Save to My List to keep a recommended standard here.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-5 space-y-3">
+                  {savedStandards.map((standard: any) => (
+                    <div key={standard.is_number} className="rounded border border-slate-200 bg-white p-4 hover:border-blue-200 hover:bg-blue-50/20">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="text-sm font-bold text-[#133a67]">{standard.is_number}</div>
+                          <div className="mt-1 text-xs text-slate-600">{standard.title}</div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {standard.category && <span className="rounded bg-blue-50 px-2 py-1 text-[10px] font-semibold text-[#24539a]">{standard.category}</span>}
+                            {standard.edition && <span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">Edition {standard.edition}</span>}
+                            {standard.match_score !== undefined && <span className="rounded bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">Match {Math.round(Number(standard.match_score) * 100)}%</span>}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { setSelectedStandard(standard); setDrawer(true) }}
+                          className="shrink-0 rounded bg-blue-50 px-3 py-2 text-[11px] font-semibold text-[#1767aa] hover:bg-blue-100"
+                        >View Details</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : active === 'Notifications' ? (
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">Notifications</div>
+              <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">Notifications</h2>
+              {notificationCount > 0 ? (
+                <div className="mt-5 rounded border border-blue-100 bg-[#f7fbff] p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blue-50 text-[#1767aa]"><Bookmark size={17} /></div>
+                    <div>
+                      <div className="text-xs font-semibold text-[#163b63]">Standard saved successfully</div>
+                      <div className="mt-1 text-[11px] leading-relaxed text-slate-500">{notificationMessage || 'A standard was saved to My List.'}</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-6 rounded border border-slate-200 p-8 text-center">
+                  <Bell size={28} className="mx-auto text-slate-300" />
+                  <div className="mt-3 text-sm font-semibold text-slate-600">No notifications yet</div>
+                  <p className="mt-1 text-xs text-slate-400">Save a recommended standard to receive a notification.</p>
+                </div>
+              )}
+            </div>
           ) : active === 'Dashboard' ? (
             <EmptyPage
               title="Dashboard"
