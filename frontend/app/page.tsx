@@ -31,8 +31,40 @@ import {
 } from 'lucide-react'
 
 
+const UI_HI: Record<string, string> = {
+  'New Search':'नई खोज','Dashboard':'डैशबोर्ड','My Documents':'मेरे दस्तावेज़','Saved Standards':'सहेजे गए मानक','Notifications':'सूचनाएँ','Workspace':'कार्यस्थल','QUALITY STANDARDS,':'गुणवत्ता मानक,','STRONGER INDIA':'मजबूत भारत','Build better specifications with trusted standards.':'विश्वसनीय मानकों के साथ बेहतर विनिर्देश तैयार करें।','Procurement intelligence platform':'प्रोक्योरमेंट इंटेलिजेंस प्लेटफ़ॉर्म','Turn Procurement Requirements':'प्रोक्योरमेंट आवश्यकताओं को बदलें','into the Right Indian Standards':'सही भारतीय मानकों में','AI-powered recommendations to help you create accurate, compliant and high-quality tender specifications.':'AI आधारित सुझावों से सटीक, अनुपालक और उच्च-गुणवत्ता वाले टेंडर विनिर्देश तैयार करें।','Provide Your Requirement':'अपनी आवश्यकता दर्ज करें','Input language':'इनपुट भाषा','Text Input':'टेक्स्ट इनपुट','Upload Document':'दस्तावेज़ अपलोड करें','Voice Input':'वॉइस इनपुट','Try an example':'एक उदाहरण आज़माएँ','Advanced Options':'उन्नत विकल्प','Find Relevant Standards':'प्रासंगिक मानक खोजें','Drag & drop your tender document here':'अपना टेंडर दस्तावेज़ यहाँ ड्रैग और ड्रॉप करें','Browse Files':'फ़ाइल चुनें','Speak your procurement requirement':'अपनी प्रोक्योरमेंट आवश्यकता बोलें','Listening...':'सुन रहा है...','Recommended Standards':'अनुशंसित मानक','AI recommendations will appear here after you provide your requirement':'आपकी आवश्यकता दर्ज करने के बाद AI सुझाव यहाँ दिखाई देंगे','Ready to find applicable Indian Standards':'लागू भारतीय मानक खोजने के लिए तैयार','Requirement Analysis':'आवश्यकता विश्लेषण','Semantic Search':'सेमांटिक खोज','BIS Standards':'BIS मानक','No exact standard found in the current AI knowledge base':'वर्तमान AI नॉलेज बेस में कोई सटीक मानक नहीं मिला','Your requirement:':'आपकी आवश्यकता:','Search Official BIS Standards':'आधिकारिक BIS मानक खोजें','Download Report':'रिपोर्ट डाउनलोड करें','Save to My List':'मेरी सूची में सहेजें','Saved':'सहेजा गया','View Details':'विवरण देखें','Why AI recommended this standard':'AI ने इस मानक की अनुशंसा क्यों की','Normative References':'नॉर्मेटिव संदर्भ','Safety Standards':'सुरक्षा मानक','Testing Standards':'परीक्षण मानक','Installation & Commissioning':'स्थापना और कमीशनिंग','Related Product Standards':'संबंधित उत्पाद मानक','Standard details':'मानक विवरण','Certification Requirements':'प्रमाणन आवश्यकताएँ','Quality Control Orders':'गुणवत्ता नियंत्रण आदेश','Amendments':'संशोधन','Related Standards':'संबंधित मानक','Save Standard':'मानक सहेजें','Add to Comparison':'तुलना में जोड़ें','No linked records available for this standard.':'इस मानक के लिए कोई लिंक्ड रिकॉर्ड उपलब्ध नहीं है।','Standards you saved from your procurement searches':'आपकी प्रोक्योरमेंट खोजों से सहेजे गए मानक','No saved standards yet':'अभी कोई मानक सहेजा नहीं गया है','No new notifications':'कोई नई सूचना नहीं','Updates will appear here when available.':'उपलब्ध होने पर अपडेट यहाँ दिखाई देंगे।','Standard saved successfully':'मानक सफलतापूर्वक सहेजा गया','No notifications yet':'अभी कोई सूचना नहीं है','Save a recommended standard to receive a notification.':'सूचना पाने के लिए किसी अनुशंसित मानक को सहेजें।','AI Understanding':'AI समझ','Understands context, not just keywords':'केवल कीवर्ड नहीं, संदर्भ को भी समझता है','Allied Standards':'संबंधित मानक','Finds related, normative and cross-referenced standards':'संबंधित, नॉर्मेटिव और क्रॉस-रेफरेंस मानक खोजता है','Latest & Compliant':'नवीनतम और अनुपालक','Checks latest versions and certification requirements':'नवीनतम संस्करण और प्रमाणन आवश्यकताओं की जाँच करता है','Analysing your requirement':'आपकी आवश्यकता का विश्लेषण किया जा रहा है','Understanding requirement':'आवश्यकता को समझना','Extracting technical parameters':'तकनीकी पैरामीटर निकालना','Searching Indian Standards':'भारतीय मानक खोजना','Checking latest versions':'नवीनतम संस्करण जाँचना','Government of India':'भारत सरकार','Bureau of Indian Standards':'भारतीय मानक ब्यूरो','Ministry of Consumer Affairs':'उपभोक्ता मामले मंत्रालय','AI Recommendation Engine for Indian Standards':'भारतीय मानकों के लिए AI अनुशंसा इंजन','All clear':'सब ठीक है','1 new':'1 नया','English':'अंग्रेज़ी','Hindi':'हिन्दी','Last saved today, 10:42 AM':'अंतिम बार आज 10:42 AM पर सहेजा गया','Prototype data notice: recommendations, editions, amendments and certification details should be verified against official BIS sources before final procurement use.':'प्रोटोटाइप डेटा सूचना: अंतिम प्रोक्योरमेंट उपयोग से पहले अनुशंसाओं, संस्करणों, संशोधनों और प्रमाणन विवरणों को आधिकारिक BIS स्रोतों से सत्यापित करें।','Open New Search':'नई खोज खोलें','Edition':'संस्करण','Status':'स्थिति','Category':'श्रेणी','Match':'मैच','Describe your procurement requirement in simple words…':'अपनी प्रोक्योरमेंट आवश्यकता सरल शब्दों में लिखें…','We do not want to recommend an unrelated standard. You can search the official BIS catalogue for your requirement instead.':'हम किसी असंबंधित मानक की अनुशंसा नहीं करना चाहते। इसके बजाय आप अपनी आवश्यकता के लिए आधिकारिक BIS कैटलॉग खोज सकते हैं।','Enter your procurement requirement on the left. Our AI engine will analyze it and recommend relevant Indian Standards.':'बाईं ओर अपनी प्रोक्योरमेंट आवश्यकता दर्ज करें। हमारा AI इंजन उसका विश्लेषण करके संबंधित भारतीय मानकों की अनुशंसा करेगा।'};
+
+function translateVisibleUI(language: 'EN'|'HI') {
+  const root=document.body;
+  const walker=document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes: Text[]=[];
+  let n: Node|null;
+  while((n=walker.nextNode())) nodes.push(n as Text);
+  nodes.forEach(node=>{
+    const raw=node.nodeValue||'';
+    const trimmed=raw.trim();
+    if(!trimmed) return;
+    const key=trimmed.replace(/\s+/g,' ');
+    if(language==='HI' && UI_HI[key]) {
+      node.nodeValue=raw.replace(trimmed,UI_HI[key]);
+    } else if(language==='EN') {
+      const english=Object.entries(UI_HI).find(([,hi])=>hi===key)?.[0];
+      if(english) node.nodeValue=raw.replace(trimmed,english);
+    } else if(language==='HI') {
+      const m=key.match(/^(\d+) standards? matched to your procurement requirement$/i);
+      if(m) node.nodeValue=raw.replace(trimmed,`${m[1]} ${m[1]==='1'?'मानक':'मानक'} आपकी प्रोक्योरमेंट आवश्यकता से मेल खाते हैं`);
+    }
+  });
+  if(language==='HI') {
+    document.querySelectorAll('textarea').forEach(el=>{ if(el.placeholder.includes('Describe your procurement requirement')) el.placeholder=UI_HI['Describe your procurement requirement in simple words…']; });
+  } else {
+    document.querySelectorAll('textarea').forEach(el=>{ if(el.placeholder.includes('अपनी प्रोक्योरमेंट')) el.placeholder='Describe your procurement requirement in simple words…'; });
+  }
+}
+
 const navItems = [
   { label: 'New Search', icon: Search },
+  { label: 'Dashboard', icon: LayoutDashboard },
   { label: 'My Documents', icon: FolderOpen },
   { label: 'Saved Standards', icon: Bookmark },
   { label: 'Notifications', icon: Bell },
@@ -263,8 +295,15 @@ function Header({
   setOpen: (x: boolean) => void
   notificationMessage: string
 }) {
-  const [language, setLanguage] = useState('EN')
+  const [language, setLanguage] = useState<'EN' | 'HI'>('EN')
   const [showLanguages, setShowLanguages] = useState(false)
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('isSpecLanguage')
+    if (savedLanguage === 'HI' || savedLanguage === 'EN') {
+      setLanguage(savedLanguage)
+    }
+  }, [])
   const [showNotifications, setShowNotifications] = useState(false)
 
   const languages = [
@@ -285,14 +324,27 @@ function Header({
       {/* Government-style identity block */}
       <div className="hidden items-center gap-3 md:flex">
         <div className="flex h-11 items-center gap-2 rounded border border-slate-200 bg-white px-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-[9px] font-bold text-[#6b4b20]">
-            INDIA
-          </div>
-          <div className="leading-tight">
-            <div className="text-[8px] font-bold text-[#092445]">भारत सरकार</div>
-            <div className="text-[8px] font-semibold text-slate-500">Government of India</div>
-          </div>
-        </div>
+  <div className="flex h-9 w-9 items-center justify-center">
+    <img
+  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc8CwbyF4aVz_gZhE2KLX_jXXaRXl7l1WOypP4KRzdeggvDOhdIL9W3Bk&s=10"
+  alt="State Emblem of India"
+  className="h-9 w-9 object-contain"
+  onError={(e) => {
+    e.currentTarget.style.display = "none"
+  }}
+/>
+  </div>
+
+  <div className="leading-tight">
+    <div className="text-[8px] font-bold text-[#092445]">
+      भारत सरकार
+    </div>
+
+    <div className="text-[8px] font-semibold text-slate-500">
+      Government of India
+    </div>
+  </div>
+</div>
 
         <div className="h-8 w-px bg-slate-200" />
 
@@ -406,6 +458,8 @@ function Header({
                   key={lang.code}
                   onClick={() => {
                     setLanguage(lang.code)
+                    localStorage.setItem('isSpecLanguage', lang.code)
+                    window.dispatchEvent(new CustomEvent('is-spec-language', { detail: lang.code }))
                     setShowLanguages(false)
                   }}
                   className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-xs hover:bg-slate-50 ${
@@ -1846,6 +1900,25 @@ function EmptyPage({
 }
 
 export default function Page() {
+  const [appLanguage, setAppLanguage] = useState<'EN' | 'HI'>('EN')
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('isSpecLanguage')
+    if (savedLanguage === 'HI' || savedLanguage === 'EN') {
+      setAppLanguage(savedLanguage)
+    }
+  }, [])
+  useEffect(() => {
+    const handler = (e: Event) => { const v=(e as CustomEvent).detail; if(v==='HI'||v==='EN') setAppLanguage(v) }
+    window.addEventListener('is-spec-language', handler)
+    return () => window.removeEventListener('is-spec-language', handler)
+  }, [])
+  useEffect(() => {
+    translateVisibleUI(appLanguage)
+    const observer = new MutationObserver(() => translateVisibleUI(appLanguage))
+    observer.observe(document.body, { childList:true, subtree:true, characterData:true })
+    return () => observer.disconnect()
+  }, [appLanguage])
+
   const [active, setActive] = useState('New Search')
   const [navOpen, setNavOpen] = useState(false)
   const [drawer, setDrawer] = useState(false)
