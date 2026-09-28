@@ -1,10 +1,11 @@
 'use client'
 
 import { useMemo, useRef, useState } from 'react'
-
+import jsPDF from 'jspdf'
 import {
   Bell,
   BookOpen,
+  Download,
   Bookmark,
   ChevronDown,
   ChevronRight,
@@ -28,6 +29,7 @@ import {
   CheckCircle2,
   ArrowUpRight,
 } from 'lucide-react'
+
 
 const navItems = [
   { label: 'New Search', icon: Search },
@@ -514,7 +516,7 @@ function InputCard({
             </span>
 
             {[
-              'LED street light',
+              
               'Water pump',
               'Solar panel',
               'Transformer',
@@ -708,18 +710,478 @@ function Results({
   setSaved,
   recommendations,
   queryText,
+  searched,
 }: {
   onDetails: (standard: any) => void
   saved: boolean
   setSaved: (x: boolean) => void
   recommendations: any[]
   queryText: string
+  searched: boolean
 }) {
   const [open, setOpen] = useState<number | null>(0)
 
+  const standard = recommendations[0]
+
+  
+
+if (!searched) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
+        Step 02
+      </div>
+
+      <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">
+        Recommended Standards
+      </h2>
+
+      <p className="mt-1 text-xs text-slate-500">
+        AI recommendations will appear here after you provide your requirement
+      </p>
+
+      <div className="mt-5 rounded border border-blue-100 bg-[#f7fbff] p-6 text-center">
+        <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-blue-50 text-[#1767aa]">
+          <Sparkles size={22} />
+        </div>
+
+        <div className="mt-4 text-sm font-semibold text-[#163b63]">
+          Ready to find applicable Indian Standards
+        </div>
+
+        <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-slate-500">
+          Enter your procurement requirement on the left. Our AI engine will
+          analyze it and recommend relevant Indian Standards.
+        </p>
+
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold text-[#24539a]">
+            Requirement Analysis
+          </span>
+
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold text-[#24539a]">
+            Semantic Search
+          </span>
+
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold text-[#24539a]">
+            BIS Standards
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+  // -----------------------------
+  // NO RESULTS
+  // -----------------------------
+  if (!standard) {
+    const searchBIS = () => {
+      const url = `https://standards.bis.gov.in/`
+      window.open(url, '_blank')
+    }
+
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
+          Step 02
+        </div>
+
+        <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">
+          Recommended Standards
+        </h2>
+
+        <p className="mt-1 text-xs text-slate-500">
+          0 standards matched to your procurement requirement
+        </p>
+
+        <div className="mt-5 rounded border border-blue-100 bg-[#f7fbff] p-5">
+          <div className="text-sm font-semibold text-[#163b63]">
+            No exact standard found in the current AI knowledge base
+          </div>
+
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+            We do not want to recommend an unrelated standard. You can search
+            the official BIS catalogue for your requirement instead.
+          </p>
+
+          {queryText && (
+            <div className="mt-3 rounded bg-white p-3 text-[11px] text-slate-600">
+              <span className="font-semibold">Your requirement:</span>{' '}
+              {queryText}
+            </div>
+          )}
+
+          <button
+            onClick={searchBIS}
+            className="mt-4 inline-flex items-center gap-2 rounded bg-[#1767aa] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#125a96]"
+          >
+            Search Official BIS Standards
+            <ArrowUpRight size={14} />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // -----------------------------
+  // DYNAMIC DATA
+  // -----------------------------
+
+  const relationships = Array.isArray(standard.relationships)
+    ? standard.relationships
+    : []
+
+  const certifications = Array.isArray(standard.certifications)
+    ? standard.certifications
+    : []
+
+  const qcos = Array.isArray(standard.qcos) ? standard.qcos : []
+
+  const amendments = Array.isArray(standard.amendments)
+    ? standard.amendments
+    : []
+
+  const matchReasons = Array.isArray(standard.match_reasons)
+    ? standard.match_reasons
+    : []
+
+  const matchPercent = Math.round(
+    Number(standard.match_score || 0) * 100
+  )
+
+  // -----------------------------
+  // DYNAMIC SECTIONS
+  // -----------------------------
+
+  const sections = [
+    {
+      title: 'Normative References',
+      count: relationships.length,
+      sub: `Standards referenced or linked with ${standard.is_number}`,
+      content:
+        relationships.length > 0
+          ? relationships.map((r: any) => [
+              r.related_standard_number ||
+                r.standard_number ||
+                r.related_standard_id ||
+                'Related Standard',
+              r.description ||
+                r.relationship_type ||
+                'Related standard reference',
+            ])
+          : [],
+    },
+
+    {
+      title: 'Safety Standards',
+      count: certifications.length + qcos.length,
+      sub: 'Certification, QCO and compliance information',
+      content: [
+        ...certifications.map((cert: any) => [
+          cert.scheme || 'Certification',
+          cert.certification_required
+            ? 'Certification required'
+            : 'Certification information available',
+        ]),
+        ...qcos.map((qco: any) => [
+          'QCO',
+          qco.qco_title || 'Quality Control Order',
+        ]),
+      ],
+    },
+
+    {
+      title: 'Testing Standards',
+      count: relationships.filter((r: any) => {
+        const text = `${r.relationship_type || ''} ${
+          r.description || ''
+        }`.toLowerCase()
+
+        return (
+          text.includes('test') ||
+          text.includes('testing') ||
+          text.includes('inspection')
+        )
+      }).length,
+      sub: 'Testing and inspection related references',
+      content: relationships
+        .filter((r: any) => {
+          const text = `${r.relationship_type || ''} ${
+            r.description || ''
+          }`.toLowerCase()
+
+          return (
+            text.includes('test') ||
+            text.includes('testing') ||
+            text.includes('inspection')
+          )
+        })
+        .map((r: any) => [
+          r.related_standard_number ||
+            r.standard_number ||
+            r.related_standard_id ||
+            'Testing Standard',
+          r.description || r.relationship_type || 'Testing reference',
+        ]),
+    },
+
+    {
+      title: 'Installation & Commissioning',
+      count: relationships.filter((r: any) => {
+        const text = `${r.relationship_type || ''} ${
+          r.description || ''
+        }`.toLowerCase()
+
+        return (
+          text.includes('installation') ||
+          text.includes('commission') ||
+          text.includes('maintenance')
+        )
+      }).length,
+      sub: 'Installation, commissioning and maintenance references',
+      content: relationships
+        .filter((r: any) => {
+          const text = `${r.relationship_type || ''} ${
+            r.description || ''
+          }`.toLowerCase()
+
+          return (
+            text.includes('installation') ||
+            text.includes('commission') ||
+            text.includes('maintenance')
+          )
+        })
+        .map((r: any) => [
+          r.related_standard_number ||
+            r.standard_number ||
+            r.related_standard_id ||
+            'Installation Standard',
+          r.description ||
+            r.relationship_type ||
+            'Installation reference',
+        ]),
+    },
+
+    {
+      title: 'Related Product Standards',
+      count: relationships.length,
+      sub: 'Related products and equipment',
+      content:
+        relationships.length > 0
+          ? relationships.map((r: any) => [
+              r.related_standard_number ||
+                r.standard_number ||
+                r.related_standard_id ||
+                'Related Standard',
+              r.description ||
+                r.relationship_type ||
+                'Related product standard',
+            ])
+          : [],
+    },
+  ]
+
+  // -----------------------------
+  // DOWNLOAD REPORT
+  // -----------------------------
+
+const downloadReport = () => {
+  const doc = new jsPDF()
+
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const margin = 18
+  const contentWidth = pageWidth - margin * 2
+
+  let y = 20
+
+  // Header
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(20)
+  doc.setTextColor(9, 36, 69)
+  doc.text('IS-SPEC AI', margin, y)
+
+  y += 8
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  doc.setTextColor(90, 105, 120)
+  doc.text(
+    'AI Recommendation Engine for Indian Standards',
+    margin,
+    y
+  )
+
+  y += 15
+
+  // Helper
+  const addSection = (title: string) => {
+    if (y > 265) {
+      doc.addPage()
+      y = 20
+    }
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(13)
+    doc.setTextColor(23, 103, 170)
+    doc.text(title, margin, y)
+
+    y += 8
+  }
+
+  const addText = (
+    text: string,
+    size = 10,
+    color = [55, 65, 81]
+  ) => {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(size)
+    doc.setTextColor(color[0], color[1], color[2])
+
+    const lines = doc.splitTextToSize(
+      text || 'Not available',
+      contentWidth
+    )
+
+    if (y + lines.length * 5 > 280) {
+      doc.addPage()
+      y = 20
+    }
+
+    doc.text(lines, margin, y)
+    y += lines.length * 5 + 5
+  }
+
+  // Requirement
+  addSection('Procurement Requirement')
+  addText(queryText || 'Not provided')
+
+  // Recommended standard
+  addSection('Recommended Standard')
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(17)
+  doc.setTextColor(19, 58, 103)
+  doc.text(
+    standard.is_number || 'N/A',
+    margin,
+    y
+  )
+
+  y += 8
+
+  addText(
+    standard.title || 'N/A',
+    11,
+    [50, 60, 70]
+  )
+
+  // Match
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(11)
+  doc.setTextColor(4, 120, 87)
+  doc.text(
+    `Match Score: ${matchPercent}%`,
+    margin,
+    y
+  )
+
+  y += 10
+
+  // Metadata
+  addSection('Standard Information')
+
+  addText(
+    `Category: ${standard.category || 'N/A'}`
+  )
+
+  addText(
+    `Edition: ${standard.edition || 'N/A'}`
+  )
+
+  addText(
+    `Status: ${standard.status || 'N/A'}`
+  )
+
+  addText(
+    `Amendments: ${amendments.length}`
+  )
+
+  // Scope
+  addSection('Scope')
+
+  addText(
+    standard.scope || 'Not available'
+  )
+
+  // AI reason
+  addSection('Why AI Recommended This Standard')
+
+  if (matchReasons.length > 0) {
+    matchReasons.forEach((reason: string) => {
+      addText(`• ${reason}`)
+    })
+  } else {
+    addText(
+      '• Relevant to the procurement product and technical requirements.'
+    )
+  }
+
+  // Compliance
+  addSection('Compliance Information')
+
+  addText(
+    `Certifications: ${certifications.length}`
+  )
+
+  addText(
+    `Quality Control Orders: ${qcos.length}`
+  )
+
+  addText(
+    `Related Standards: ${relationships.length}`
+  )
+
+  // Notice
+  addSection('Important Notice')
+
+  addText(
+    'This is a prototype AI recommendation. Verify the current standard, amendments, certification requirements and QCO applicability against official BIS sources before using the recommendation in a procurement document.',
+    9,
+    [120, 80, 20]
+  )
+
+  // Footer
+  const totalPages = doc.getNumberOfPages()
+
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i)
+
+    doc.setFontSize(8)
+    doc.setTextColor(130, 130, 130)
+
+    doc.text(
+      `IS-SPEC AI • Page ${i} of ${totalPages}`,
+      margin,
+      290
+    )
+  }
+
+  // DIRECT PDF DOWNLOAD
+  doc.save(
+    `${standard.is_number || 'IS-SPEC-AI'}-Recommendation-Report.pdf`
+  )
+}
+  // -----------------------------
+  // MAIN RESULTS UI
+  // -----------------------------
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+      {/* HEADER */}
       <div className="flex flex-wrap items-start justify-between gap-3">
+
         <div>
           <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
             Step 02
@@ -730,192 +1192,265 @@ function Results({
           </h2>
 
           <p className="mt-1 text-xs text-slate-500">
-            {recommendations.length} standards matched to your procurement
-            requirement
+            {recommendations.length} standard
+            {recommendations.length !== 1 ? 's' : ''} matched to your
+            procurement requirement
           </p>
+        </div>
+
+        <div className="flex gap-2">
+
+          <button
+            onClick={downloadReport}
+            className="hidden items-center gap-1 rounded border border-slate-200 px-2.5 py-2 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 sm:flex"
+          >
+            <Download size={14} />
+            Download Report
+          </button>
+
+          <button
+            onClick={() => setSaved(!saved)}
+            className={`flex items-center gap-1 rounded border px-2.5 py-2 text-[11px] font-semibold ${
+              saved
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <Bookmark size={14} />
+
+            {saved ? 'Saved' : 'Save to My List'}
+          </button>
+
         </div>
       </div>
 
-      <div className="mt-5 space-y-4">
-        {recommendations.length === 0 ? (
-          <div className="rounded border border-blue-100 bg-[#f7fbff] p-5">
-            <div className="flex items-start gap-3">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-50 text-amber-600">
-                <Search size={17} />
-              </div>
+      {/* TABS */}
+      <div className="mt-5 flex gap-5 overflow-x-auto whitespace-nowrap border-b border-slate-200">
 
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold text-[#163b63]">
-                  No exact standard found in the current AI knowledge base
-                </div>
+        {[
+          `All Results (${recommendations.length})`,
+          `Product Standards (${recommendations.length})`,
+          `Safety (${certifications.length + qcos.length})`,
+          `Testing (${
+            sections.find(s => s.title === 'Testing Standards')?.count || 0
+          })`,
+          `Related (${relationships.length})`,
+        ].map((x, i) => (
 
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                  We do not want to recommend an unrelated standard. You can search the official BIS catalogue for your requirement instead.
-                </p>
+          <button
+            key={x}
+            className={`border-b-2 pb-2 text-[11px] font-semibold ${
+              i === 0
+                ? 'border-[#1767aa] text-[#1767aa]'
+                : 'border-transparent text-slate-400'
+            }`}
+          >
+            {x}
+          </button>
 
-                <div className="mt-3 rounded border border-slate-200 bg-white px-3 py-2">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    Your search
-                  </div>
-                  <div className="mt-1 truncate text-xs font-medium text-slate-700">
-                    {queryText || 'Procurement requirement'}
-                  </div>
-                </div>
+        ))}
 
-                <button
-                  onClick={() => {
-                    const term = queryText?.trim() || 'Indian Standard'
-                    const url = `https://standards.bis.gov.in/website/know-your-standards?searchTerm=${encodeURIComponent(term)}`
-                    window.open(url, '_blank', 'noopener,noreferrer')
-                  }}
-                  className="mt-4 inline-flex items-center gap-2 rounded bg-[#1767aa] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#125a96]"
-                >
-                  <Search size={14} />
-                  Search Official BIS Standards
-                  <ArrowUpRight size={14} />
-                </button>
-
-                <div className="mt-2 text-[10px] text-slate-400">
-                  Opens the official BIS Know Your Standards catalogue in a new tab.
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          recommendations.map((standard) => (
-            <div
-              key={standard.id}
-              className="rounded border border-blue-100 bg-[#f7fbff] p-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="text-base font-bold text-[#133a67]">
-                    {standard.is_number}
-                  </div>
-
-                  <div className="mt-1 text-xs text-slate-600">
-                    {standard.title}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge green>
-                      Match {(standard.match_score * 100).toFixed(0)}%
-                    </Badge>
-
-                    {standard.certifications?.length > 0 && (
-                      <Badge>Certification</Badge>
-                    )}
-
-                    {standard.qcos?.length > 0 && <Badge>QCO</Badge>}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onDetails(standard)}
-                  className="flex items-center gap-1 text-xs font-bold text-[#1767aa] hover:underline"
-                >
-                  View Details
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded border border-slate-200 bg-slate-200 sm:grid-cols-4">
-                {[
-                  ['Category', standard.category || '—'],
-                  ['Edition', standard.edition || '—'],
-                  ['Status', standard.status || '—'],
-                  [
-                    'Amendments',
-                    String(standard.amendments?.length || 0),
-                  ],
-                ].map(([a, b]) => (
-                  <div key={a} className="bg-white p-3">
-                    <div className="text-[10px] text-slate-400">
-                      {a}
-                    </div>
-
-                    <div className="mt-1 text-[11px] font-semibold text-slate-700">
-                      {b}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-3 rounded border border-slate-200 bg-white p-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Why AI recommended this
-                </div>
-
-                <div className="mt-2 space-y-1">
-                  {(standard.match_reasons || []).map(
-                    (reason: string) => (
-                      <div
-                        key={reason}
-                        className="text-[11px] text-slate-600"
-                      >
-                        • {reason}
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
       </div>
 
-      {recommendations.length > 0 && sections.map((s, i) => (
+      {/* MAIN STANDARD CARD */}
+      <div className="mt-5 rounded border border-blue-100 bg-[#f7fbff] p-4">
+
+        <div className="flex flex-wrap items-start justify-between gap-3">
+
+          <div>
+
+            <div className="text-base font-bold text-[#133a67]">
+              {standard.is_number}
+            </div>
+
+            <div className="mt-1 text-xs text-slate-600">
+              {standard.title}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+
+              <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                <CheckCircle2 size={11} />
+                Match {matchPercent}%
+              </span>
+
+              <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#24539a]">
+                Indian Standard
+              </span>
+
+              {certifications.length > 0 && (
+                <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                  <ShieldCheck size={11} />
+                  Certification
+                </span>
+              )}
+
+              {qcos.length > 0 && (
+                <span className="inline-flex items-center gap-1 rounded bg-purple-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-purple-700">
+                  QCO
+                </span>
+              )}
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={() => onDetails(standard)}
+            className="flex items-center gap-1 rounded bg-blue-50 px-3 py-2 text-xs font-semibold text-[#1767aa] hover:bg-blue-100"
+          >
+            View Details
+            <ChevronRight size={14} />
+          </button>
+
+        </div>
+
+        {/* META */}
+        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded border border-slate-200 bg-slate-200 sm:grid-cols-4">
+
+          {[
+            ['Category', standard.category || '—'],
+            ['Edition', standard.edition || '—'],
+            ['Status', standard.status || 'Reference'],
+            ['Amendments', String(amendments.length)],
+          ].map(([a, b]) => (
+
+            <div key={a} className="bg-white p-3">
+
+              <div className="text-[10px] text-slate-400">
+                {a}
+              </div>
+
+              <div className="mt-1 text-[11px] font-semibold text-slate-700">
+                {b}
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+        {/* AI REASON */}
+        <div className="mt-3 rounded border border-blue-100 bg-blue-50/70 p-4">
+
+          <div className="flex items-center gap-2 text-xs font-bold text-[#1c5e9d]">
+            <Sparkles size={15} />
+            Why AI recommended this standard
+          </div>
+
+          <div className="mt-2 space-y-1">
+
+            {matchReasons.length > 0 ? (
+
+              matchReasons.map((reason: string, index: number) => (
+                <div
+                  key={`${reason}-${index}`}
+                  className="text-[11px] leading-relaxed text-slate-600"
+                >
+                  • {reason}
+                </div>
+              ))
+
+            ) : (
+
+              <div className="text-[11px] leading-relaxed text-slate-600">
+                • Relevant to the procurement product and technical
+                requirements.
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* EXPANDABLE SECTIONS */}
+      {sections.map((s, i) => (
+
         <div
           key={s.title}
           className="mt-3 overflow-hidden rounded border border-slate-200 bg-white"
         >
+
           <button
             onClick={() => setOpen(open === i ? null : i)}
             className="flex w-full items-center gap-3 p-3 text-left"
           >
+
             <div className="grid h-6 w-6 place-items-center rounded bg-blue-50 text-[#2866a3]">
+
               <ChevronRight
                 size={14}
                 className={`transition-transform ${
                   open === i ? 'rotate-90' : ''
                 }`}
               />
+
             </div>
 
             <div className="flex-1">
+
               <div className="text-xs font-semibold text-slate-700">
-                {s.title}{' '}
-                <span className="text-slate-400">
-                  ({s.count})
-                </span>
+                {s.title} ({s.count})
               </div>
 
               <div className="mt-0.5 text-[10px] text-slate-400">
                 {s.sub}
               </div>
+
             </div>
+
           </button>
 
           {open === i && (
-            <div className="border-t border-slate-100 px-3 pb-3 pt-1">
-              {s.content.map(([a, b]) => (
-                <div
-                  key={a}
-                  className="border-b border-slate-100 py-2 last:border-0"
-                >
-                  <div className="text-[11px] font-semibold text-[#2464a5]">
-                    {a}
+
+            <div className="border-t border-slate-100">
+
+              {s.content.length > 0 ? (
+
+                s.content.map(([num, title]: string[], index: number) => (
+
+                  <div
+                    key={`${num}-${index}`}
+                    className="flex items-center gap-4 border-b border-slate-50 px-4 py-3 last:border-b-0"
+                  >
+
+                    <div className="text-[11px] font-semibold text-[#1767aa]">
+                      {num}
+                    </div>
+
+                    <div className="flex-1 text-[10px] text-slate-500">
+                      {title}
+                    </div>
+
+                    <ChevronRight
+                      size={12}
+                      className="text-slate-300"
+                    />
+
                   </div>
 
-                  <div className="mt-0.5 text-[10px] leading-relaxed text-slate-500">
-                    {b}
-                  </div>
+                ))
+
+              ) : (
+
+                <div className="px-4 py-4 text-[11px] text-slate-400">
+                  No linked records available for this standard.
                 </div>
-              ))}
+
+              )}
+
             </div>
+
           )}
+
         </div>
+
       ))}
+
     </div>
   )
 }
@@ -1376,13 +1911,16 @@ export default function Page() {
                     </div>
                   )}
 
-                  <Results
+                                   
+                                    <Results
                     onDetails={handleDetails}
                     saved={saved}
                     setSaved={setSaved}
                     recommendations={recommendations}
                     queryText={queryText}
+                    searched={searched}
                   />
+                  
                 </div>
               </div>
 
@@ -1437,5 +1975,7 @@ export default function Page() {
         />
       )}
     </div>
+
+    
   )
 }
