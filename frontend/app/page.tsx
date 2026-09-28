@@ -372,9 +372,7 @@ function InputCard({
   onUpload: (file: File) => void
 }) {
   const [tab, setTab] = useState('Text Input')
-  const [text, setText] = useState(
-    'Procurement of high-voltage transformers for 132/33 kV substation, oil-immersed type, with cooling arrangement, suitable for continuous operation, including testing and installation requirements.'
-  )
+  const [text, setText] = useState('')
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -405,6 +403,49 @@ function InputCard({
 
     onSearch(text)
   }
+
+  const [isListening, setIsListening] = useState(false);
+
+  const handleVoiceInput = () => {
+  const SpeechRecognition =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice input is not supported. Please use Chrome or Edge.");
+    return;
+  }
+
+  
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    setIsListening(true);
+  };
+
+  recognition.onresult = (event: any) => {
+    const transcript = event.results[0][0].transcript;
+
+    setText(transcript);
+    setTab("Text Input");
+  };
+
+  recognition.onerror = (event: any) => {
+    console.error("Voice input error:", event.error);
+    setIsListening(false);
+  };
+
+  recognition.onend = () => {
+    setIsListening(false);
+  };
+
+  recognition.start();
+};
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -560,19 +601,38 @@ function InputCard({
             </div>
           )}
         </>
-      ) : (
-        <div className="mt-4 grid h-44 place-items-center rounded border border-dashed border-slate-300 bg-slate-50 text-center">
-          <div>
-            <div className="text-sm font-semibold text-slate-700">
-              Voice input
-            </div>
+      ) : tab === 'Voice Input' ? (
+  <div className="mt-4 grid h-44 place-items-center rounded border border-dashed border-slate-300 bg-slate-50 text-center">
+    <div>
+      <div className="text-sm font-semibold text-slate-700">
+        {isListening
+          ? 'Listening...'
+          : 'Speak your procurement requirement'}
+      </div>
 
-            <div className="mt-1 text-[11px] text-slate-500">
-              Voice input will be available in the next version.
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="mt-1 text-[11px] text-slate-500">
+        {isListening
+          ? 'Please describe your requirement clearly'
+          : 'Click the button and speak your requirement'}
+      </div>
+
+      <button
+        type="button"
+        onClick={handleVoiceInput}
+        disabled={isListening}
+        className={`mt-4 inline-flex items-center gap-2 rounded px-5 py-2.5 text-xs font-semibold text-white transition ${
+          isListening
+            ? 'cursor-not-allowed bg-red-400'
+            : 'bg-[#1767aa] hover:bg-[#125a96]'
+        }`}
+      >
+        🎤 {isListening ? 'Listening...' : 'Start Voice Input'}
+      </button>
+    </div>
+     
+  </div>
+) : null}
+      
 
       <button
         className="mt-5 flex items-center gap-1 text-xs font-semibold text-[#2464a5] hover:underline"
@@ -595,6 +655,9 @@ function InputCard({
     </div>
   )
 }
+
+
+
 
 function FeatureCards() {
   return (
