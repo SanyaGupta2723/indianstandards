@@ -33,7 +33,6 @@ import {
 
 const navItems = [
   { label: 'New Search', icon: Search },
-  { label: 'Dashboard', icon: LayoutDashboard },
   { label: 'My Documents', icon: FolderOpen },
   { label: 'Saved Standards', icon: Bookmark },
   { label: 'Notifications', icon: Bell },
@@ -149,13 +148,13 @@ function Sidebar({
   setActive,
   open,
   setOpen,
-  notificationCount,
+  savedCount,
 }: {
   active: string
   setActive: (x: string) => void
   open: boolean
   setOpen: (x: boolean) => void
-  notificationCount: number
+  savedCount: number
 }) {
   return (
     <>
@@ -190,6 +189,7 @@ function Sidebar({
           <button
             onClick={() => setOpen(false)}
             className="ml-auto lg:hidden"
+            aria-label="Close menu"
           >
             <X size={18} />
           </button>
@@ -217,9 +217,9 @@ function Sidebar({
 
               {label}
 
-              {label === 'Saved Standards' && notificationCount > 0 && (
+              {label === 'Saved Standards' && savedCount > 0 && (
                 <span className="ml-auto rounded-full bg-[#e6a82f] px-1.5 py-0.5 text-[9px] font-bold text-[#092445]">
-                  {notificationCount}
+                  {savedCount}
                 </span>
               )}
             </button>
@@ -247,9 +247,7 @@ function Sidebar({
 
           <div className="mt-5 flex items-center gap-2 text-[10px] text-blue-300">
             <Settings2 size={13} />
-
             System v1.4.2
-
             <span className="ml-auto h-2 w-2 rounded-full bg-emerald-400" />
           </div>
         </div>
@@ -260,67 +258,186 @@ function Sidebar({
 
 function Header({
   setOpen,
-  notificationCount,
+  notificationMessage,
 }: {
   setOpen: (x: boolean) => void
-  notificationCount: number
+  notificationMessage: string
 }) {
+  const [language, setLanguage] = useState('EN')
+  const [showLanguages, setShowLanguages] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+
+  const languages = [
+    { code: 'EN', label: 'English' },
+    { code: 'HI', label: 'हिन्दी' },
+  ]
+
   return (
     <header className="fixed left-0 right-0 top-0 z-20 flex h-[72px] items-center border-b border-slate-200 bg-white/95 px-4 backdrop-blur lg:left-[246px] lg:px-8">
       <button
         onClick={() => setOpen(true)}
         className="mr-3 rounded p-2 hover:bg-slate-100 lg:hidden"
+        aria-label="Open menu"
       >
         <Menu size={19} />
       </button>
 
+      {/* Government-style identity block */}
       <div className="hidden items-center gap-3 md:flex">
-        <div className="grid h-9 w-9 place-items-center rounded border border-slate-200 bg-slate-50 text-[10px] font-black text-[#092445]">
-          भारत
-          <br />
-          INDIA
+        <div className="flex h-11 items-center gap-2 rounded border border-slate-200 bg-white px-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-[9px] font-bold text-[#6b4b20]">
+            INDIA
+          </div>
+          <div className="leading-tight">
+            <div className="text-[8px] font-bold text-[#092445]">भारत सरकार</div>
+            <div className="text-[8px] font-semibold text-slate-500">Government of India</div>
+          </div>
         </div>
 
-        <div className="h-7 w-px bg-slate-200" />
+        <div className="h-8 w-px bg-slate-200" />
 
-        <div>
-          <div className="text-[14px] font-bold tracking-tight text-[#092445]">
-            IS-SPEC AI
-          </div>
+        <div className="flex items-center gap-2">
+          <img
+            src="https://www.bis.gov.in/wp-content/uploads/2024/12/BIS-LOGO.png"
+            alt="Bureau of Indian Standards"
+            className="h-9 w-9 object-contain"
+          />
 
-          <div className="text-[10px] text-slate-500">
-            AI Recommendation Engine for Indian Standards
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="text-[14px] font-bold tracking-tight text-[#092445]">
+                IS-SPEC AI
+              </div>
+              <span className="rounded bg-[#f4b942]/20 px-1.5 py-0.5 text-[8px] font-bold text-[#8a6100]">
+                PROTOTYPE
+              </span>
+            </div>
+
+            <div className="text-[10px] text-slate-500">
+              AI Recommendation Engine for Indian Standards
+            </div>
+
+            <div className="text-[8px] text-slate-400">
+              Bureau of Indian Standards • Ministry of Consumer Affairs
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="ml-auto flex items-center gap-2 md:gap-5">
-        <button
-          className="relative rounded p-2 text-slate-500 hover:bg-slate-100"
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
+      <div className="ml-auto flex items-center gap-2 md:gap-4">
+        {/* Notifications */}
+        <div className="relative">
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className={`relative rounded-lg p-2 transition ${
+              showNotifications
+                ? 'bg-blue-50 text-[#1769aa]'
+                : 'text-slate-500 hover:bg-slate-100'
+            }`}
+            aria-label="Notifications"
+            title="Notifications"
+          >
+            <Bell size={19} />
 
-        </button>
+            {notificationMessage && (
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+            )}
+          </button>
 
-        <button className="hidden items-center gap-1 text-xs font-medium text-slate-600 sm:flex">
-          <Globe2 size={15} />
-          EN
-          <ChevronDown size={13} />
-        </button>
+          {showNotifications && (
+            <div className="absolute right-0 top-11 z-50 w-80 rounded-lg border border-slate-200 bg-white p-3 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <div className="text-sm font-semibold text-[#092445]">
+                  Notifications
+                </div>
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-semibold text-blue-600">
+                  {notificationMessage ? '1 new' : 'All clear'}
+                </span>
+              </div>
 
+              {notificationMessage ? (
+                <div className="mt-3 rounded-md border border-blue-100 bg-[#f7fbff] p-3">
+                  <div className="flex gap-2">
+                    <Bookmark size={15} className="mt-0.5 shrink-0 text-[#1769aa]" />
+                    <div>
+                      <div className="text-xs font-semibold text-slate-700">
+                        Standard saved successfully
+                      </div>
+                      <div className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                        {notificationMessage}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-6 text-center">
+                  <Bell size={24} className="mx-auto text-slate-300" />
+                  <div className="mt-2 text-xs font-semibold text-slate-600">
+                    No new notifications
+                  </div>
+                  <div className="mt-1 text-[10px] text-slate-400">
+                    Updates will appear here when available.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Dynamic language selector */}
+        <div className="relative hidden sm:block">
+          <button
+            onClick={() => setShowLanguages(!showLanguages)}
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+            aria-label="Select language"
+          >
+            <Globe2 size={15} />
+            <span>{language}</span>
+            <ChevronDown
+              size={13}
+              className={`transition-transform ${showLanguages ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {showLanguages && (
+            <div className="absolute right-0 top-10 z-50 w-36 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    setLanguage(lang.code)
+                    setShowLanguages(false)
+                  }}
+                  className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-xs hover:bg-slate-50 ${
+                    language === lang.code
+                      ? 'bg-blue-50 font-semibold text-[#1769aa]'
+                      : 'text-slate-600'
+                  }`}
+                >
+                  <span>{lang.label}</span>
+                  {language === lang.code && <span>✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Government identity instead of personal user name */}
         <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
-          <div className="grid h-8 w-8 place-items-center rounded-full bg-[#dcecff] text-xs font-bold text-[#174d8c]">
-            SG
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50">
+            <img
+              src="https://www.bis.gov.in/wp-content/uploads/2024/12/BIS-LOGO.png"
+              alt="BIS"
+              className="h-7 w-7 object-contain"
+            />
           </div>
 
           <div className="hidden text-left sm:block">
-            <div className="text-xs font-semibold text-slate-800">
-              Sanya Gupta
+            <div className="text-xs font-semibold text-[#092445]">
+              Bureau of Indian Standards
             </div>
-
-            <div className="text-[10px] text-slate-500">
-              Procurement Officer
+            <div className="text-[9px] text-slate-500">
+              Government of India
             </div>
           </div>
 
@@ -381,6 +498,7 @@ function InputCard({
 }) {
   const [tab, setTab] = useState('Text Input')
   const [text, setText] = useState('')
+  const [language, setLanguage] = useState('English')
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -479,9 +597,13 @@ function InputCard({
           Input language
         </label>
 
-        <select className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600">
-          <option>English</option>
-          <option>Hindi</option>
+        <select
+          value={language}
+          onChange={e => setLanguage(e.target.value)}
+          className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"
+        >
+          <option value="English">English</option>
+          <option value="Hinglish">Hinglish</option>
         </select>
       </div>
 
@@ -508,7 +630,11 @@ function InputCard({
               value={text}
               onChange={e => setText(e.target.value)}
               className="h-32 w-full resize-none bg-transparent p-3 text-[13px] leading-relaxed text-slate-700 outline-none"
-              placeholder="Describe your procurement requirement in simple words…"
+              placeholder={
+                language === 'Hinglish'
+                  ? 'Example: Mujhe 132/33 kV ka oil immersed transformer chahiye, cooling aur testing ke saath...'
+                  : 'Describe your procurement requirement in simple words…'
+              }
             />
 
             <div className="flex justify-end px-3 pb-2 text-[10px] text-slate-400">
@@ -1732,17 +1858,18 @@ export default function Page() {
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [queryText, setQueryText] = useState('')
   const [savedStandards, setSavedStandards] = useState<any[]>([])
-  const [notificationCount, setNotificationCount] = useState(0)
   const [notificationMessage, setNotificationMessage] = useState('')
 
   useEffect(() => {
     try {
       const savedData = localStorage.getItem('savedStandards')
-      const notifications = localStorage.getItem('notificationCount')
       const message = localStorage.getItem('notificationMessage')
 
-      if (savedData) setSavedStandards(JSON.parse(savedData))
-      if (notifications) setNotificationCount(Number(notifications))
+      if (savedData) {
+        const parsed = JSON.parse(savedData)
+        if (Array.isArray(parsed)) setSavedStandards(parsed)
+      }
+
       if (message) setNotificationMessage(message)
     } catch (error) {
       console.error('Failed to load saved data:', error)
@@ -1765,16 +1892,13 @@ export default function Page() {
     }
 
     const updated = [...savedStandards, standard]
-    const nextNotificationCount = notificationCount + 1
     const message = `Saved ${standard.is_number} — ${standard.title || 'standard'} to My List.`
 
     setSavedStandards(updated)
     setSaved(true)
-    setNotificationCount(nextNotificationCount)
     setNotificationMessage(message)
 
     localStorage.setItem('savedStandards', JSON.stringify(updated))
-    localStorage.setItem('notificationCount', String(nextNotificationCount))
     localStorage.setItem('notificationMessage', message)
   }
 
@@ -1889,7 +2013,7 @@ export default function Page() {
     <div className="min-h-screen bg-[#f5f8fb] text-slate-800">
       <Header
         setOpen={setNavOpen}
-        notificationCount={notificationCount}
+        notificationMessage={notificationMessage}
       />
 
       <Sidebar
@@ -1897,7 +2021,7 @@ export default function Page() {
         setActive={setActive}
         open={navOpen}
         setOpen={setNavOpen}
-        notificationCount={notificationCount}
+        savedCount={savedStandards.length}
       />
 
       <main className="pt-[72px] lg:pl-[246px]">
@@ -2053,7 +2177,7 @@ export default function Page() {
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
               <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">Notifications</div>
               <h2 className="mt-1 text-lg font-semibold text-[#102b4d]">Notifications</h2>
-              {notificationCount > 0 ? (
+              {notificationMessage ? (
                 <div className="mt-5 rounded border border-blue-100 bg-[#f7fbff] p-4">
                   <div className="flex items-start gap-3">
                     <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blue-50 text-[#1767aa]"><Bookmark size={17} /></div>
