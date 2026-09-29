@@ -12,3 +12,4 @@ sentence-transformers
 PyMuPDF
 python-multipart
 faster-whisper
+psycopg[binary]
