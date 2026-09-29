@@ -32,7 +32,7 @@ import {
 
 
 const UI_HI: Record<string, string> = {
-  'New Search':'नई खोज','Dashboard':'डैशबोर्ड','My Documents':'मेरे दस्तावेज़','Saved Standards':'सहेजे गए मानक','Notifications':'सूचनाएँ','Workspace':'कार्यस्थल','QUALITY STANDARDS,':'गुणवत्ता मानक,','STRONGER INDIA':'मजबूत भारत','Build better specifications with trusted standards.':'विश्वसनीय मानकों के साथ बेहतर विनिर्देश तैयार करें।','Procurement intelligence platform':'प्रोक्योरमेंट इंटेलिजेंस प्लेटफ़ॉर्म','Turn Procurement Requirements':'प्रोक्योरमेंट आवश्यकताओं को बदलें','into the Right Indian Standards':'सही भारतीय मानकों में','AI-powered recommendations to help you create accurate, compliant and high-quality tender specifications.':'AI आधारित सुझावों से सटीक, अनुपालक और उच्च-गुणवत्ता वाले टेंडर विनिर्देश तैयार करें।','Provide Your Requirement':'अपनी आवश्यकता दर्ज करें','Input language':'इनपुट भाषा','Text Input':'टेक्स्ट इनपुट','Upload Document':'दस्तावेज़ अपलोड करें','Voice Input':'वॉइस इनपुट','Try an example':'एक उदाहरण आज़माएँ','Advanced Options':'उन्नत विकल्प','Find Relevant Standards':'प्रासंगिक मानक खोजें','Drag & drop your tender document here':'अपना टेंडर दस्तावेज़ यहाँ ड्रैग और ड्रॉप करें','Browse Files':'फ़ाइल चुनें','Speak your procurement requirement':'अपनी प्रोक्योरमेंट आवश्यकता बोलें','Listening...':'सुन रहा है...','Recommended Standards':'अनुशंसित मानक','AI recommendations will appear here after you provide your requirement':'आपकी आवश्यकता दर्ज करने के बाद AI सुझाव यहाँ दिखाई देंगे','Ready to find applicable Indian Standards':'लागू भारतीय मानक खोजने के लिए तैयार','Requirement Analysis':'आवश्यकता विश्लेषण','Semantic Search':'सेमांटिक खोज','BIS Standards':'BIS मानक','No exact standard found in the current AI knowledge base':'वर्तमान AI नॉलेज बेस में कोई सटीक मानक नहीं मिला','Your requirement:':'आपकी आवश्यकता:','Search Official BIS Standards':'आधिकारिक BIS मानक खोजें','Download Report':'रिपोर्ट डाउनलोड करें','Save to My List':'मेरी सूची में सहेजें','Saved':'सहेजा गया','View Details':'विवरण देखें','Why AI recommended this standard':'AI ने इस मानक की अनुशंसा क्यों की','Normative References':'नॉर्मेटिव संदर्भ','Safety Standards':'सुरक्षा मानक','Testing Standards':'परीक्षण मानक','Installation & Commissioning':'स्थापना और कमीशनिंग','Related Product Standards':'संबंधित उत्पाद मानक','Standard details':'मानक विवरण','Certification Requirements':'प्रमाणन आवश्यकताएँ','Quality Control Orders':'गुणवत्ता नियंत्रण आदेश','Amendments':'संशोधन','Related Standards':'संबंधित मानक','Save Standard':'मानक सहेजें','Add to Comparison':'तुलना में जोड़ें','No linked records available for this standard.':'इस मानक के लिए कोई लिंक्ड रिकॉर्ड उपलब्ध नहीं है।','Standards you saved from your procurement searches':'आपकी प्रोक्योरमेंट खोजों से सहेजे गए मानक','No saved standards yet':'अभी कोई मानक सहेजा नहीं गया है','No new notifications':'कोई नई सूचना नहीं','Updates will appear here when available.':'उपलब्ध होने पर अपडेट यहाँ दिखाई देंगे।','Standard saved successfully':'मानक सफलतापूर्वक सहेजा गया','No notifications yet':'अभी कोई सूचना नहीं है','Save a recommended standard to receive a notification.':'सूचना पाने के लिए किसी अनुशंसित मानक को सहेजें।','AI Understanding':'AI समझ','Understands context, not just keywords':'केवल कीवर्ड नहीं, संदर्भ को भी समझता है','Allied Standards':'संबंधित मानक','Finds related, normative and cross-referenced standards':'संबंधित, नॉर्मेटिव और क्रॉस-रेफरेंस मानक खोजता है','Latest & Compliant':'नवीनतम और अनुपालक','Checks latest versions and certification requirements':'नवीनतम संस्करण और प्रमाणन आवश्यकताओं की जाँच करता है','Analysing your requirement':'आपकी आवश्यकता का विश्लेषण किया जा रहा है','Understanding requirement':'आवश्यकता को समझना','Extracting technical parameters':'तकनीकी पैरामीटर निकालना','Searching Indian Standards':'भारतीय मानक खोजना','Checking latest versions':'नवीनतम संस्करण जाँचना','Government of India':'भारत सरकार','Bureau of Indian Standards':'भारतीय मानक ब्यूरो','Ministry of Consumer Affairs':'उपभोक्ता मामले मंत्रालय','Food & Public Distribution':'खाद्य एवं सार्वजनिक वितरण','Department of Consumer Affairs (DoCA)':'उपभोक्ता मामले विभाग (DoCA)','AI Recommendation Engine for Indian Standards':'भारतीय मानकों के लिए AI अनुशंसा इंजन','All clear':'सब ठीक है','1 new':'1 नया','English':'अंग्रेज़ी','Hindi':'हिन्दी','Last saved today, 10:42 AM':'अंतिम बार आज 10:42 AM पर सहेजा गया','Prototype data notice: recommendations, editions, amendments and certification details should be verified against official BIS sources before final procurement use.':'प्रोटोटाइप डेटा सूचना: अंतिम प्रोक्योरमेंट उपयोग से पहले अनुशंसाओं, संस्करणों, संशोधनों और प्रमाणन विवरणों को आधिकारिक BIS स्रोतों से सत्यापित करें।','Open New Search':'नई खोज खोलें','Edition':'संस्करण','Status':'स्थिति','Category':'श्रेणी','Match':'मैच','Describe your procurement requirement in simple words…':'अपनी प्रोक्योरमेंट आवश्यकता सरल शब्दों में लिखें…','We do not want to recommend an unrelated standard. You can search the official BIS catalogue for your requirement instead.':'हम किसी असंबंधित मानक की अनुशंसा नहीं करना चाहते। इसके बजाय आप अपनी आवश्यकता के लिए आधिकारिक BIS कैटलॉग खोज सकते हैं।','Enter your procurement requirement on the left. Our AI engine will analyze it and recommend relevant Indian Standards.':'बाईं ओर अपनी प्रोक्योरमेंट आवश्यकता दर्ज करें। हमारा AI इंजन उसका विश्लेषण करके संबंधित भारतीय मानकों की अनुशंसा करेगा।'};
+  'New Search':'नई खोज','Dashboard':'डैशबोर्ड','My Documents':'मेरे दस्तावेज़','Saved Standards':'सहेजे गए मानक','Notifications':'सूचनाएँ','Workspace':'कार्यस्थल','QUALITY STANDARDS,':'गुणवत्ता मानक,','STRONGER INDIA':'मजबूत भारत','Build better specifications with trusted standards.':'विश्वसनीय मानकों के साथ बेहतर विनिर्देश तैयार करें।','Procurement intelligence platform':'प्रोक्योरमेंट इंटेलिजेंस प्लेटफ़ॉर्म','Turn Procurement Requirements':'प्रोक्योरमेंट आवश्यकताओं को बदलें','into the Right Indian Standards':'सही भारतीय मानकों में','AI-powered recommendations to help you create accurate, compliant and high-quality tender specifications.':'AI आधारित सुझावों से सटीक, अनुपालक और उच्च-गुणवत्ता वाले टेंडर विनिर्देश तैयार करें।','Provide Your Requirement':'अपनी आवश्यकता दर्ज करें','Input language':'इनपुट भाषा','Text Input':'टेक्स्ट इनपुट','Upload Document':'दस्तावेज़ अपलोड करें','Try an example':'एक उदाहरण आज़माएँ','Advanced Options':'उन्नत विकल्प','Find Relevant Standards':'प्रासंगिक मानक खोजें','Drag & drop your tender document here':'अपना टेंडर दस्तावेज़ यहाँ ड्रैग और ड्रॉप करें','Browse Files':'फ़ाइल चुनें','Recommended Standards':'अनुशंसित मानक','AI recommendations will appear here after you provide your requirement':'आपकी आवश्यकता दर्ज करने के बाद AI सुझाव यहाँ दिखाई देंगे','Ready to find applicable Indian Standards':'लागू भारतीय मानक खोजने के लिए तैयार','Requirement Analysis':'आवश्यकता विश्लेषण','Semantic Search':'सेमांटिक खोज','BIS Standards':'BIS मानक','No exact standard found in the current AI knowledge base':'वर्तमान AI नॉलेज बेस में कोई सटीक मानक नहीं मिला','Your requirement:':'आपकी आवश्यकता:','Search Official BIS Standards':'आधिकारिक BIS मानक खोजें','Download Report':'रिपोर्ट डाउनलोड करें','Save to My List':'मेरी सूची में सहेजें','Saved':'सहेजा गया','View Details':'विवरण देखें','Why AI recommended this standard':'AI ने इस मानक की अनुशंसा क्यों की','Normative References':'नॉर्मेटिव संदर्भ','Safety Standards':'सुरक्षा मानक','Testing Standards':'परीक्षण मानक','Installation & Commissioning':'स्थापना और कमीशनिंग','Related Product Standards':'संबंधित उत्पाद मानक','Standard details':'मानक विवरण','Certification Requirements':'प्रमाणन आवश्यकताएँ','Quality Control Orders':'गुणवत्ता नियंत्रण आदेश','Amendments':'संशोधन','Related Standards':'संबंधित मानक','Save Standard':'मानक सहेजें','Add to Comparison':'तुलना में जोड़ें','No linked records available for this standard.':'इस मानक के लिए कोई लिंक्ड रिकॉर्ड उपलब्ध नहीं है।','Standards you saved from your procurement searches':'आपकी प्रोक्योरमेंट खोजों से सहेजे गए मानक','No saved standards yet':'अभी कोई मानक सहेजा नहीं गया है','No new notifications':'कोई नई सूचना नहीं','Updates will appear here when available.':'उपलब्ध होने पर अपडेट यहाँ दिखाई देंगे।','Standard saved successfully':'मानक सफलतापूर्वक सहेजा गया','No notifications yet':'अभी कोई सूचना नहीं है','Save a recommended standard to receive a notification.':'सूचना पाने के लिए किसी अनुशंसित मानक को सहेजें।','AI Understanding':'AI समझ','Understands context, not just keywords':'केवल कीवर्ड नहीं, संदर्भ को भी समझता है','Allied Standards':'संबंधित मानक','Finds related, normative and cross-referenced standards':'संबंधित, नॉर्मेटिव और क्रॉस-रेफरेंस मानक खोजता है','Latest & Compliant':'नवीनतम और अनुपालक','Checks latest versions and certification requirements':'नवीनतम संस्करण और प्रमाणन आवश्यकताओं की जाँच करता है','Analysing your requirement':'आपकी आवश्यकता का विश्लेषण किया जा रहा है','Understanding requirement':'आवश्यकता को समझना','Extracting technical parameters':'तकनीकी पैरामीटर निकालना','Searching Indian Standards':'भारतीय मानक खोजना','Checking latest versions':'नवीनतम संस्करण जाँचना','Government of India':'भारत सरकार','Bureau of Indian Standards':'भारतीय मानक ब्यूरो','Ministry of Consumer Affairs':'उपभोक्ता मामले मंत्रालय','Food & Public Distribution':'खाद्य एवं सार्वजनिक वितरण','Department of Consumer Affairs (DoCA)':'उपभोक्ता मामले विभाग (DoCA)','AI Recommendation Engine for Indian Standards':'भारतीय मानकों के लिए AI अनुशंसा इंजन','All clear':'सब ठीक है','1 new':'1 नया','English':'अंग्रेज़ी','Hindi':'हिन्दी','Last saved today, 10:42 AM':'अंतिम बार आज 10:42 AM पर सहेजा गया','Prototype data notice: recommendations, editions, amendments and certification details should be verified against official BIS sources before final procurement use.':'प्रोटोटाइप डेटा सूचना: अंतिम प्रोक्योरमेंट उपयोग से पहले अनुशंसाओं, संस्करणों, संशोधनों और प्रमाणन विवरणों को आधिकारिक BIS स्रोतों से सत्यापित करें।','Open New Search':'नई खोज खोलें','Edition':'संस्करण','Status':'स्थिति','Category':'श्रेणी','Match':'मैच','Describe your procurement requirement in simple words…':'अपनी प्रोक्योरमेंट आवश्यकता सरल शब्दों में लिखें…','We do not want to recommend an unrelated standard. You can search the official BIS catalogue for your requirement instead.':'हम किसी असंबंधित मानक की अनुशंसा नहीं करना चाहते। इसके बजाय आप अपनी आवश्यकता के लिए आधिकारिक BIS कैटलॉग खोज सकते हैं।','Enter your procurement requirement on the left. Our AI engine will analyze it and recommend relevant Indian Standards.':'बाईं ओर अपनी प्रोक्योरमेंट आवश्यकता दर्ज करें। हमारा AI इंजन उसका विश्लेषण करके संबंधित भारतीय मानकों की अनुशंसा करेगा।'};
 
 function translateVisibleUI(language: 'EN'|'HI') {
   const root=document.body;
@@ -588,222 +588,6 @@ function InputCard({
     onSearch(text)
   }
 
-  const [isListening, setIsListening] = useState(false)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const mediaStreamRef = useRef<MediaStream | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
-
-  const stopMicrophone = () => {
-    if (voiceTimeoutRef.current) {
-      clearTimeout(voiceTimeoutRef.current)
-      voiceTimeoutRef.current = null
-    }
-
-    if (mediaRecorderRef.current) {
-      try {
-        if (mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.stop()
-        }
-      } catch (error) {
-        console.error('🎤 Could not stop recorder:', error)
-      }
-      mediaRecorderRef.current = null
-    }
-
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop())
-      mediaStreamRef.current = null
-    }
-
-    setIsListening(false)
-  }
-
-  const handleVoiceInput = async () => {
-    if (typeof window === 'undefined' || isListening) return
-
-    if (!navigator.mediaDevices?.getUserMedia) {
-      alert(
-        'Microphone access is not available. Please use the latest Google Chrome or Microsoft Edge.'
-      )
-      return
-    }
-
-    if (typeof MediaRecorder === 'undefined') {
-      alert(
-        'Audio recording is not supported in this browser. Please use the latest Google Chrome or Microsoft Edge.'
-      )
-      return
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      })
-
-      mediaStreamRef.current = stream
-      audioChunksRef.current = []
-
-      const mimeTypes = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/ogg;codecs=opus',
-      ]
-
-      const supportedMimeType = mimeTypes.find(type =>
-        MediaRecorder.isTypeSupported(type)
-      )
-
-      const recorder = supportedMimeType
-        ? new MediaRecorder(stream, { mimeType: supportedMimeType })
-        : new MediaRecorder(stream)
-
-      mediaRecorderRef.current = recorder
-      setIsListening(true)
-
-      recorder.ondataavailable = event => {
-        if (event.data && event.data.size > 0) {
-          audioChunksRef.current.push(event.data)
-        }
-      }
-
-      recorder.onerror = event => {
-        console.error('🎤 Audio recorder error:', event)
-        alert('Voice recording failed. Please try again.')
-        stopMicrophone()
-      }
-
-      recorder.onstop = async () => {
-        const chunks = audioChunksRef.current
-        audioChunksRef.current = []
-
-        if (!chunks.length) {
-          alert('No audio was recorded. Please speak clearly and try again.')
-          stopMicrophone()
-          return
-        }
-
-        const blobType =
-          supportedMimeType ||
-          recorder.mimeType ||
-          'audio/webm'
-
-        const audioBlob = new Blob(chunks, { type: blobType })
-
-        if (mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach(track => track.stop())
-          mediaStreamRef.current = null
-        }
-
-        mediaRecorderRef.current = null
-        setIsListening(false)
-
-        try {
-          const formData = new FormData()
-
-          const extension = blobType.includes('ogg')
-            ? 'ogg'
-            : 'webm'
-
-          formData.append(
-            'file',
-            new File(
-              [audioBlob],
-              `voice-requirement.${extension}`,
-              { type: blobType }
-            )
-          )
-
-          formData.append(
-            'language',
-            language === 'Hinglish' ? 'hi' : 'en'
-          )
-
-          console.log('🎤 Sending audio to Whisper backend...')
-
-          const response = await fetch(
-            'http://127.0.0.1:8000/api/voice/transcribe',
-            {
-              method: 'POST',
-              body: formData,
-            }
-          )
-
-          const data = await response.json().catch(() => ({}))
-
-          if (!response.ok) {
-            throw new Error(
-              data?.detail || 'Voice transcription failed.'
-            )
-          }
-
-          const transcript = String(data?.text || '').trim()
-
-          console.log('🎤 Whisper transcript:', transcript)
-
-          if (!transcript) {
-            alert(
-              'I could not understand the audio. Please speak clearly and try again.'
-            )
-            return
-          }
-
-          setText(transcript)
-          setTab('Text Input')
-        } catch (error) {
-          console.error('🎤 Whisper transcription error:', error)
-
-          alert(
-            error instanceof Error
-              ? error.message
-              : 'Voice transcription failed. Please make sure the backend is running and try again.'
-          )
-        }
-      }
-
-      recorder.start(250)
-
-      console.log('🎤 Recording started')
-
-      // Automatically stop after 12 seconds.
-      voiceTimeoutRef.current = setTimeout(() => {
-        if (
-          mediaRecorderRef.current &&
-          mediaRecorderRef.current.state !== 'inactive'
-        ) {
-          console.log('🎤 Automatic recording stop')
-          mediaRecorderRef.current.stop()
-        }
-      }, 12000)
-    } catch (error: any) {
-      console.error('🎤 Microphone access error:', error)
-
-      if (error?.name === 'NotAllowedError') {
-        alert(
-          'Microphone permission denied. Click the 🔒 icon near the address bar, allow Microphone access for localhost, and try again.'
-        )
-      } else if (error?.name === 'NotFoundError') {
-        alert(
-          'No microphone was found. Please connect or enable a microphone and try again.'
-        )
-      } else if (error?.name === 'NotReadableError') {
-        alert(
-          'The microphone is already being used by another application. Close apps using the microphone and try again.'
-        )
-      } else {
-        alert(
-          'Could not access the microphone. Please check your Windows microphone settings and try again.'
-        )
-      }
-
-      stopMicrophone()
-    }
-  }
-
-
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -840,7 +624,7 @@ function InputCard({
       </div>
 
       <div className="mt-4 flex border-b border-slate-200">
-        {['Text Input', 'Upload Document', 'Voice Input'].map(x => (
+        {['Text Input', 'Upload Document'].map(x => (
           <button
             key={x}
             onClick={() => setTab(x)}
@@ -967,44 +751,7 @@ function InputCard({
             </div>
           )}
         </>
-      ) : tab === 'Voice Input' ? (
-  <div className="mt-4 grid h-44 place-items-center rounded border border-dashed border-slate-300 bg-slate-50 text-center">
-    <div>
-      <div className="text-sm font-semibold text-slate-700">
-        {isListening
-          ? 'Listening...'
-          : 'Speak your procurement requirement'}
-      </div>
-
-      <div className="mt-1 text-[11px] text-slate-500">
-        {isListening
-          ? 'Please describe your requirement clearly'
-          : 'Click the button and speak your requirement'}
-      </div>
-
-      <button
-        type="button"
-        onClick={handleVoiceInput}
-        disabled={isListening}
-        className={`mt-4 inline-flex items-center gap-2 rounded px-5 py-2.5 text-xs font-semibold text-white transition ${
-          isListening
-            ? 'cursor-not-allowed bg-red-400'
-            : 'bg-[#1767aa] hover:bg-[#125a96]'
-        }`}
-      >
-        🎤 {isListening ? 'Listening...' : 'Start Voice Input'}
-      </button>
-    </div>
-     
-  </div>
-) : null}
-      
-
-      <button
-        className="mt-5 flex items-center gap-1 text-xs font-semibold text-[#2464a5] hover:underline"
-      >
-        
-      </button>
+      ) : null}
 
       <button
         onClick={handleSubmit}
@@ -2212,7 +1959,7 @@ export default function Page() {
 
     try {
       const response = await fetch(
-        'http://127.0.0.1:8000/api/recommend/',
+  'http://13.49.102.227:8000/api/recommend/',
         {
           method: 'POST',
           headers: {
@@ -2264,7 +2011,7 @@ export default function Page() {
     formData.append('file', file)
 
     const response = await fetch(
-      'http://127.0.0.1:8000/api/upload/pdf/recommend',
+      'http://13.49.102.227:8000/api/upload/pdf/recommend',
       {
         method: 'POST',
         body: formData,
