@@ -592,7 +592,6 @@ function InputCard({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
-  const voiceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const stopMicrophone = () => {
     if (voiceTimeoutRef.current) {
@@ -804,16 +803,7 @@ function InputCard({
     }
   }
 
-  const handleStopVoiceInput = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== 'inactive'
-    ) {
-      mediaRecorderRef.current.stop()
-    } else {
-      stopMicrophone()
-    }
-  }
+
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
