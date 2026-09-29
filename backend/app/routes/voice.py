@@ -7,11 +7,7 @@ router = APIRouter(prefix="/api/voice", tags=["voice"])
 
 # Small CPU-friendly model for the prototype.
 # First request downloads the model automatically.
-model = WhisperModel(
-    "small",
-    device="cpu",
-    compute_type="int8",
-)
+WhisperModel("base", device="cpu", compute_type="int8")
 
 @router.post("/transcribe")
 async def transcribe_voice(

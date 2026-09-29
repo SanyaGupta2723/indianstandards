@@ -584,188 +584,210 @@ function InputCard({
   }
 
   const [isListening, setIsListening] = useState(false)
-  const recognitionRef = useRef<any>(null)
-  const retryCountRef = useRef(0)
-  const micStreamRef = useRef<MediaStream | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const mediaStreamRef = useRef<MediaStream | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const voiceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const stopMicStream = () => {
-    if (micStreamRef.current) {
-      micStreamRef.current.getTracks().forEach(track => track.stop())
-      micStreamRef.current = null
+  const stopMicrophone = () => {
+    if (voiceTimeoutRef.current) {
+      clearTimeout(voiceTimeoutRef.current)
+      voiceTimeoutRef.current = null
     }
-  }
 
-  const finishVoiceInput = () => {
+    if (mediaRecorderRef.current) {
+      try {
+        if (mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop()
+        }
+      } catch (error) {
+        console.error('🎤 Could not stop recorder:', error)
+      }
+      mediaRecorderRef.current = null
+    }
+
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop())
+      mediaStreamRef.current = null
+    }
+
     setIsListening(false)
-    stopMicStream()
-    recognitionRef.current = null
   }
 
   const handleVoiceInput = async () => {
     if (typeof window === 'undefined' || isListening) return
 
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition
-
-    if (!SpeechRecognition) {
+    if (!navigator.mediaDevices?.getUserMedia) {
       alert(
-        'Voice input is not supported in this browser. Please use the latest Google Chrome or Microsoft Edge.'
+        'Microphone access is not available. Please use the latest Google Chrome or Microsoft Edge.'
+      )
+      return
+    }
+
+    if (typeof MediaRecorder === 'undefined') {
+      alert(
+        'Audio recording is not supported in this browser. Please use the latest Google Chrome or Microsoft Edge.'
       )
       return
     }
 
     try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        alert(
-          'Microphone access is not available in this browser. Please use Google Chrome or Microsoft Edge.'
-        )
-        return
-      }
-
-      // Ask for the real microphone stream first.
-      // This helps Chrome connect the SpeechRecognition service to the
-      // microphone instead of immediately returning "no-speech".
-      micStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
       })
 
+      mediaStreamRef.current = stream
+      audioChunksRef.current = []
+
+      const mimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+      ]
+
+      const supportedMimeType = mimeTypes.find(type =>
+        MediaRecorder.isTypeSupported(type)
+      )
+
+      const recorder = supportedMimeType
+        ? new MediaRecorder(stream, { mimeType: supportedMimeType })
+        : new MediaRecorder(stream)
+
+      mediaRecorderRef.current = recorder
       setIsListening(true)
-      retryCountRef.current = 0
 
-      const startRecognition = () => {
-        const recognition = new SpeechRecognition()
-        recognitionRef.current = recognition
-
-        recognition.lang = language === 'Hinglish' ? 'hi-IN' : 'en-IN'
-        recognition.continuous = false
-        recognition.interimResults = true
-        recognition.maxAlternatives = 3
-
-        let finalTranscript = ''
-
-        recognition.onstart = () => {
-          console.log('🎤 Voice recognition started')
-          setIsListening(true)
-        }
-
-        recognition.onresult = (event: any) => {
-          let transcript = ''
-
-          for (
-            let i = event.resultIndex || 0;
-            i < event.results.length;
-            i++
-          ) {
-            const result = event.results[i]
-            const piece = result?.[0]?.transcript || ''
-
-            transcript += `${piece} `
-
-            if (result?.isFinal) {
-              finalTranscript += `${piece} `
-            }
-          }
-
-          const combined = (finalTranscript || transcript).trim()
-
-          console.log('🎤 Voice transcript:', combined)
-
-          if (combined) {
-            setText(combined)
-          }
-        }
-
-        recognition.onerror = (event: any) => {
-          console.error('🎤 Voice input error:', event.error)
-
-          // Chrome sometimes fires no-speech even when the user is speaking.
-          // Retry automatically instead of stopping immediately.
-          if (event.error === 'no-speech' && retryCountRef.current < 2) {
-            retryCountRef.current += 1
-
-            try {
-              recognition.stop()
-            } catch {}
-
-            setTimeout(() => {
-              if (micStreamRef.current) {
-                startRecognition()
-              }
-            }, 500)
-
-            return
-          }
-
-          if (
-            event.error === 'not-allowed' ||
-            event.error === 'service-not-allowed'
-          ) {
-            alert(
-              'Microphone permission denied. Please click the 🔒 icon near the address bar, allow Microphone access for localhost, and try again.'
-            )
-          } else if (event.error === 'audio-capture') {
-            alert(
-              'Microphone was not detected. Please check your microphone connection and Windows microphone settings.'
-            )
-          } else if (event.error === 'network') {
-            alert(
-              'Voice recognition service is unavailable. Please check your internet connection and try again.'
-            )
-          } else if (event.error !== 'no-speech') {
-            alert(
-              'Voice input could not be completed. Please try speaking again.'
-            )
-          }
-
-          finishVoiceInput()
-        }
-
-        recognition.onend = () => {
-          console.log('🎤 Voice recognition ended')
-
-          if (finalTranscript.trim()) {
-            setText(finalTranscript.trim())
-            setTab('Text Input')
-            finishVoiceInput()
-            return
-          }
-
-          // One extra retry if Chrome ended without returning text.
-          if (retryCountRef.current < 2 && micStreamRef.current) {
-            retryCountRef.current += 1
-
-            setTimeout(() => {
-              if (micStreamRef.current) {
-                startRecognition()
-              }
-            }, 400)
-
-            return
-          }
-
-          finishVoiceInput()
-        }
-
-        try {
-          recognition.start()
-        } catch (error) {
-          console.error('🎤 Could not start voice recognition:', error)
-          finishVoiceInput()
+      recorder.ondataavailable = event => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
         }
       }
 
-      startRecognition()
+      recorder.onerror = event => {
+        console.error('🎤 Audio recorder error:', event)
+        alert('Voice recording failed. Please try again.')
+        stopMicrophone()
+      }
+
+      recorder.onstop = async () => {
+        const chunks = audioChunksRef.current
+        audioChunksRef.current = []
+
+        if (!chunks.length) {
+          alert('No audio was recorded. Please speak clearly and try again.')
+          stopMicrophone()
+          return
+        }
+
+        const blobType =
+          supportedMimeType ||
+          recorder.mimeType ||
+          'audio/webm'
+
+        const audioBlob = new Blob(chunks, { type: blobType })
+
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach(track => track.stop())
+          mediaStreamRef.current = null
+        }
+
+        mediaRecorderRef.current = null
+        setIsListening(false)
+
+        try {
+          const formData = new FormData()
+
+          const extension = blobType.includes('ogg')
+            ? 'ogg'
+            : 'webm'
+
+          formData.append(
+            'file',
+            new File(
+              [audioBlob],
+              `voice-requirement.${extension}`,
+              { type: blobType }
+            )
+          )
+
+          formData.append(
+            'language',
+            language === 'Hinglish' ? 'hi' : 'en'
+          )
+
+          console.log('🎤 Sending audio to Whisper backend...')
+
+          const response = await fetch(
+            'http://127.0.0.1:8000/api/voice/transcribe',
+            {
+              method: 'POST',
+              body: formData,
+            }
+          )
+
+          const data = await response.json().catch(() => ({}))
+
+          if (!response.ok) {
+            throw new Error(
+              data?.detail || 'Voice transcription failed.'
+            )
+          }
+
+          const transcript = String(data?.text || '').trim()
+
+          console.log('🎤 Whisper transcript:', transcript)
+
+          if (!transcript) {
+            alert(
+              'I could not understand the audio. Please speak clearly and try again.'
+            )
+            return
+          }
+
+          setText(transcript)
+          setTab('Text Input')
+        } catch (error) {
+          console.error('🎤 Whisper transcription error:', error)
+
+          alert(
+            error instanceof Error
+              ? error.message
+              : 'Voice transcription failed. Please make sure the backend is running and try again.'
+          )
+        }
+      }
+
+      recorder.start(250)
+
+      console.log('🎤 Recording started')
+
+      // Automatically stop after 12 seconds.
+      voiceTimeoutRef.current = setTimeout(() => {
+        if (
+          mediaRecorderRef.current &&
+          mediaRecorderRef.current.state !== 'inactive'
+        ) {
+          console.log('🎤 Automatic recording stop')
+          mediaRecorderRef.current.stop()
+        }
+      }, 12000)
     } catch (error: any) {
       console.error('🎤 Microphone access error:', error)
 
       if (error?.name === 'NotAllowedError') {
         alert(
-          'Microphone permission denied. Please click the 🔒 icon near the address bar, allow Microphone access for localhost, and try again.'
+          'Microphone permission denied. Click the 🔒 icon near the address bar, allow Microphone access for localhost, and try again.'
         )
       } else if (error?.name === 'NotFoundError') {
         alert(
           'No microphone was found. Please connect or enable a microphone and try again.'
+        )
+      } else if (error?.name === 'NotReadableError') {
+        alert(
+          'The microphone is already being used by another application. Close apps using the microphone and try again.'
         )
       } else {
         alert(
@@ -773,7 +795,18 @@ function InputCard({
         )
       }
 
-      finishVoiceInput()
+      stopMicrophone()
+    }
+  }
+
+  const handleStopVoiceInput = () => {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== 'inactive'
+    ) {
+      mediaRecorderRef.current.stop()
+    } else {
+      stopMicrophone()
     }
   }
 
