@@ -29,6 +29,16 @@ PRODUCT_ALIASES = {
         "reinforcement steel",
         "rebar",
     ],
+    "reinforcement steel": [
+        "reinforcement steel",
+        "reinforcement",
+        "reinforcing steel",
+        "rebar",
+        "tmt",
+        "deformed bar",
+        "deformed bars",
+        "concrete reinforcement",
+    ],
     "water pump": [
         "pump",
         "water pump",

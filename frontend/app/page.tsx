@@ -1221,6 +1221,24 @@ if (!searched) {
     Number(standard.match_score || 0) * 100
   )
 
+  // Other AI-retrieved standards are useful as related candidates when the
+  // database has no explicit relationship records. They are clearly labelled
+  // as AI-related candidates and are NOT presented as verified normative
+  // references.
+  const relatedRecommendations = recommendations
+    .filter((item: any) => item.id !== standard.id)
+    .slice(0, 4)
+
+  const testingRelationshipRows = relationships.filter((r: any) => {
+    const text = `${r.relationship_type || ''} ${r.description || ''}`.toLowerCase()
+    return text.includes('test') || text.includes('testing') || text.includes('inspection')
+  })
+
+  const installationRelationshipRows = relationships.filter((r: any) => {
+    const text = `${r.relationship_type || ''} ${r.description || ''}`.toLowerCase()
+    return text.includes('installation') || text.includes('commission') || text.includes('maintenance')
+  })
+
   // -----------------------------
   // DYNAMIC SECTIONS
   // -----------------------------
@@ -1264,80 +1282,38 @@ if (!searched) {
 
     {
       title: 'Testing Standards',
-      count: relationships.filter((r: any) => {
-        const text = `${r.relationship_type || ''} ${
-          r.description || ''
-        }`.toLowerCase()
-
-        return (
-          text.includes('test') ||
-          text.includes('testing') ||
-          text.includes('inspection')
-        )
-      }).length,
-      sub: 'Testing and inspection related references',
-      content: relationships
-        .filter((r: any) => {
-          const text = `${r.relationship_type || ''} ${
-            r.description || ''
-          }`.toLowerCase()
-
-          return (
-            text.includes('test') ||
-            text.includes('testing') ||
-            text.includes('inspection')
-          )
-        })
-        .map((r: any) => [
-          r.related_standard_number ||
-            r.standard_number ||
-            r.related_standard_id ||
-            'Testing Standard',
-          r.description || r.relationship_type || 'Testing reference',
-        ]),
+      count: testingRelationshipRows.length,
+      sub: 'Verified testing and inspection references',
+      content: testingRelationshipRows.map((r: any) => [
+        r.related_standard_number ||
+          r.standard_number ||
+          r.related_standard_id ||
+          'Testing Standard',
+        r.description || r.relationship_type || 'Testing reference',
+      ]),
     },
 
     {
       title: 'Installation & Commissioning',
-      count: relationships.filter((r: any) => {
-        const text = `${r.relationship_type || ''} ${
-          r.description || ''
-        }`.toLowerCase()
-
-        return (
-          text.includes('installation') ||
-          text.includes('commission') ||
-          text.includes('maintenance')
-        )
-      }).length,
-      sub: 'Installation, commissioning and maintenance references',
-      content: relationships
-        .filter((r: any) => {
-          const text = `${r.relationship_type || ''} ${
-            r.description || ''
-          }`.toLowerCase()
-
-          return (
-            text.includes('installation') ||
-            text.includes('commission') ||
-            text.includes('maintenance')
-          )
-        })
-        .map((r: any) => [
-          r.related_standard_number ||
-            r.standard_number ||
-            r.related_standard_id ||
-            'Installation Standard',
-          r.description ||
-            r.relationship_type ||
-            'Installation reference',
-        ]),
+      count: installationRelationshipRows.length,
+      sub: 'Verified installation, commissioning and maintenance references',
+      content: installationRelationshipRows.map((r: any) => [
+        r.related_standard_number ||
+          r.standard_number ||
+          r.related_standard_id ||
+          'Installation Standard',
+        r.description ||
+          r.relationship_type ||
+          'Installation reference',
+      ]),
     },
 
     {
       title: 'Related Product Standards',
-      count: relationships.length,
-      sub: 'Related products and equipment',
+      count: relationships.length > 0 ? relationships.length : relatedRecommendations.length,
+      sub: relationships.length > 0
+        ? 'Verified related products and equipment'
+        : 'AI-retrieved related candidates from the current knowledge base',
       content:
         relationships.length > 0
           ? relationships.map((r: any) => [
@@ -1349,7 +1325,10 @@ if (!searched) {
                 r.relationship_type ||
                 'Related product standard',
             ])
-          : [],
+          : relatedRecommendations.map((r: any) => [
+              r.is_number || 'Related Standard',
+              `${r.title || 'Related standard'} — AI-related candidate; verify applicability against BIS.`,
+            ]),
     },
   ]
 
@@ -1612,11 +1591,17 @@ const downloadReport = () => {
         {[
           `All Results (${recommendations.length})`,
           `Product Standards (${recommendations.length})`,
-          `Safety (${certifications.length + qcos.length})`,
-          `Testing (${
-            sections.find(s => s.title === 'Testing Standards')?.count || 0
-          })`,
-          `Related (${relationships.length})`,
+          certifications.length + qcos.length > 0
+            ? `Safety (${certifications.length + qcos.length})`
+            : 'Safety',
+          (sections.find(s => s.title === 'Testing Standards')?.count || 0) > 0
+            ? `Testing (${
+                sections.find(s => s.title === 'Testing Standards')?.count || 0
+              })`
+            : 'Testing',
+          relationships.length > 0
+            ? `Related (${relationships.length})`
+            : 'Related',
         ].map((x, i) => (
 
           <button
@@ -1776,7 +1761,8 @@ const downloadReport = () => {
             <div className="flex-1">
 
               <div className="text-xs font-semibold text-slate-700">
-                {s.title} ({s.count})
+                {s.title}
+                {s.count > 0 ? ` (${s.count})` : ''}
               </div>
 
               <div className="mt-0.5 text-[10px] text-slate-400">
@@ -1820,7 +1806,7 @@ const downloadReport = () => {
               ) : (
 
                 <div className="px-4 py-4 text-[11px] text-slate-400">
-                  No linked records available for this standard.
+                  No verified linked records are available for this section in the current knowledge base.
                 </div>
 
               )}

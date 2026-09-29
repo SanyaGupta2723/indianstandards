@@ -20,25 +20,12 @@ PRODUCT_PATTERNS = [
             r"\bled\s+lighting\b",
             r"\bstreet\s+lights?\b",
             r"\bstreet\s+lighting\b",
-        r"\bstreetlights?\b",
-        r"\bstreet-lights?\b",
             r"\broad\s+lights?\b",
-        r"\broadlights?\b",
-        r"\broad-lights?\b",
             r"\broad\s+lighting\b",
             r"\bled\s+lamp\b",
             r"\bled\s+luminaire\b",
-            r"\bled\s+bulb\b",
-            r"\bstreetlights?\b",
-            r"\bstreet-lights?\b",
-            r"\broadlights?\b",
-            r"\broad-lights?\b",
             r"\broad\s+wali\s+led\b",
             r"\bstreet\s+wali\s+led\b",
-            r"\bstreetlights?\b",
-            r"\bstreet-lights?\b",
-            r"\broadlights?\b",
-            r"\broad-lights?\b",
         ],
     ),
     (
@@ -113,6 +100,7 @@ CATEGORY_MAP = {
     "transformer": "Transformers",
     "cement": "Cement",
     "steel": "Steel",
+    "reinforcement steel": "Steel",
     "water pump": "Water Pumps",
     "solar panel": "Solar PV",
     "electrical appliance": "Electrical Appliances",
@@ -176,21 +164,13 @@ APPLICATION_PATTERNS = [
     ("Substation", [r"\bsubstation\b", r"sub\s*station", r"सबस्टेशन"]),
     ("Street Lighting", [
         r"\bstreet\s+lighting\b",
-        r"\bstreetlights?\b",
-        r"\bstreet-lights?\b",
         r"\bstreet\s+lights?\b",
         r"\broad\s+lighting\b",
         r"\broad\s+lights?\b",
-        r"\broadlights?\b",
-        r"\broad-lights?\b",
         r"\broad\s+ke\s+liye\b",
         r"\bstreet\s+ke\s+liye\b",
         r"\broad\s+wali\s+led\b",
         r"\bstreet\s+wali\s+led\b",
-            r"\bstreetlights?\b",
-            r"\bstreet-lights?\b",
-            r"\broadlights?\b",
-            r"\broad-lights?\b",
     ]),
     ("Outdoor", [r"\boutdoor\b", r"\bbahar\b", r"\boutside\b"]),
     ("Agricultural", [r"\bagriculture\b", r"\bagricultural\b", r"\bkheti\b"]),
@@ -217,11 +197,6 @@ def _first_product(text: str):
         r"\bled\s+lights?\b",
         r"\bled\s+lamp\b",
         r"\bled\s+luminaire\b",
-            r"\bled\s+bulb\b",
-            r"\bstreetlights?\b",
-            r"\bstreet-lights?\b",
-            r"\broadlights?\b",
-            r"\broad-lights?\b",
     ])
     has_street_context = _contains_any(text, [
         r"\bstreet\b",
@@ -233,6 +208,19 @@ def _first_product(text: str):
     ])
     if has_led and has_street_context:
         return "led street light"
+
+    # Keep reinforcement products separate from generic steel. This prevents
+    # unrelated steel standards (for example wire ropes) from outranking
+    # reinforcement-bar standards when the procurement text says rebar/TMT.
+    if _contains_any(text, [
+        r"\breinforcement\s+(?:steel|bars?|rods?)\b",
+        r"\breinforcing\s+(?:steel|bars?|rods?)\b",
+        r"\brebar\b",
+        r"\btmt\s+bars?\b",
+        r"\bdeformed\s+(?:steel\s+)?bars?\b",
+        r"\bconcrete\s+reinforcement\b",
+    ]):
+        return "reinforcement steel"
 
     for product, patterns in PRODUCT_PATTERNS:
         if _contains_any(text, patterns):
