@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pgvector
+python-dotenv
+pydantic
+numpy
+pandas
+scikit-learn
+sentence-transformers
+PyMuPDF
+python-multipart
+faster-whisper
