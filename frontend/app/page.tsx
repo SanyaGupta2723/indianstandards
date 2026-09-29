@@ -64,7 +64,6 @@ function translateVisibleUI(language: 'EN'|'HI') {
 
 const navItems = [
   { label: 'New Search', icon: Search },
-  { label: 'Dashboard', icon: LayoutDashboard },
   { label: 'My Documents', icon: FolderOpen },
   { label: 'Saved Standards', icon: Bookmark },
   { label: 'Notifications', icon: Bell },
@@ -585,47 +584,198 @@ function InputCard({
   }
 
   const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
+  const retryCountRef = useRef(0)
+  const micStreamRef = useRef<MediaStream | null>(null)
 
-  const handleVoiceInput = () => {
-  const SpeechRecognition =
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition;
-
-  if (!SpeechRecognition) {
-    alert("Voice input is not supported. Please use Chrome or Edge.");
-    return;
+  const stopMicStream = () => {
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(track => track.stop())
+      micStreamRef.current = null
+    }
   }
 
-  
+  const finishVoiceInput = () => {
+    setIsListening(false)
+    stopMicStream()
+    recognitionRef.current = null
+  }
 
-  const recognition = new SpeechRecognition();
+  const handleVoiceInput = async () => {
+    if (typeof window === 'undefined' || isListening) return
 
-  recognition.lang = "en-IN";
-  recognition.continuous = false;
-  recognition.interimResults = false;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition
 
-  recognition.onstart = () => {
-    setIsListening(true);
-  };
+    if (!SpeechRecognition) {
+      alert(
+        'Voice input is not supported in this browser. Please use the latest Google Chrome or Microsoft Edge.'
+      )
+      return
+    }
 
-  recognition.onresult = (event: any) => {
-    const transcript = event.results[0][0].transcript;
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        alert(
+          'Microphone access is not available in this browser. Please use Google Chrome or Microsoft Edge.'
+        )
+        return
+      }
 
-    setText(transcript);
-    setTab("Text Input");
-  };
+      // Ask for the real microphone stream first.
+      // This helps Chrome connect the SpeechRecognition service to the
+      // microphone instead of immediately returning "no-speech".
+      micStreamRef.current = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      })
 
-  recognition.onerror = (event: any) => {
-    console.error("Voice input error:", event.error);
-    setIsListening(false);
-  };
+      setIsListening(true)
+      retryCountRef.current = 0
 
-  recognition.onend = () => {
-    setIsListening(false);
-  };
+      const startRecognition = () => {
+        const recognition = new SpeechRecognition()
+        recognitionRef.current = recognition
 
-  recognition.start();
-};
+        recognition.lang = language === 'Hinglish' ? 'hi-IN' : 'en-IN'
+        recognition.continuous = false
+        recognition.interimResults = true
+        recognition.maxAlternatives = 3
+
+        let finalTranscript = ''
+
+        recognition.onstart = () => {
+          console.log('🎤 Voice recognition started')
+          setIsListening(true)
+        }
+
+        recognition.onresult = (event: any) => {
+          let transcript = ''
+
+          for (
+            let i = event.resultIndex || 0;
+            i < event.results.length;
+            i++
+          ) {
+            const result = event.results[i]
+            const piece = result?.[0]?.transcript || ''
+
+            transcript += `${piece} `
+
+            if (result?.isFinal) {
+              finalTranscript += `${piece} `
+            }
+          }
+
+          const combined = (finalTranscript || transcript).trim()
+
+          console.log('🎤 Voice transcript:', combined)
+
+          if (combined) {
+            setText(combined)
+          }
+        }
+
+        recognition.onerror = (event: any) => {
+          console.error('🎤 Voice input error:', event.error)
+
+          // Chrome sometimes fires no-speech even when the user is speaking.
+          // Retry automatically instead of stopping immediately.
+          if (event.error === 'no-speech' && retryCountRef.current < 2) {
+            retryCountRef.current += 1
+
+            try {
+              recognition.stop()
+            } catch {}
+
+            setTimeout(() => {
+              if (micStreamRef.current) {
+                startRecognition()
+              }
+            }, 500)
+
+            return
+          }
+
+          if (
+            event.error === 'not-allowed' ||
+            event.error === 'service-not-allowed'
+          ) {
+            alert(
+              'Microphone permission denied. Please click the 🔒 icon near the address bar, allow Microphone access for localhost, and try again.'
+            )
+          } else if (event.error === 'audio-capture') {
+            alert(
+              'Microphone was not detected. Please check your microphone connection and Windows microphone settings.'
+            )
+          } else if (event.error === 'network') {
+            alert(
+              'Voice recognition service is unavailable. Please check your internet connection and try again.'
+            )
+          } else if (event.error !== 'no-speech') {
+            alert(
+              'Voice input could not be completed. Please try speaking again.'
+            )
+          }
+
+          finishVoiceInput()
+        }
+
+        recognition.onend = () => {
+          console.log('🎤 Voice recognition ended')
+
+          if (finalTranscript.trim()) {
+            setText(finalTranscript.trim())
+            setTab('Text Input')
+            finishVoiceInput()
+            return
+          }
+
+          // One extra retry if Chrome ended without returning text.
+          if (retryCountRef.current < 2 && micStreamRef.current) {
+            retryCountRef.current += 1
+
+            setTimeout(() => {
+              if (micStreamRef.current) {
+                startRecognition()
+              }
+            }, 400)
+
+            return
+          }
+
+          finishVoiceInput()
+        }
+
+        try {
+          recognition.start()
+        } catch (error) {
+          console.error('🎤 Could not start voice recognition:', error)
+          finishVoiceInput()
+        }
+      }
+
+      startRecognition()
+    } catch (error: any) {
+      console.error('🎤 Microphone access error:', error)
+
+      if (error?.name === 'NotAllowedError') {
+        alert(
+          'Microphone permission denied. Please click the 🔒 icon near the address bar, allow Microphone access for localhost, and try again.'
+        )
+      } else if (error?.name === 'NotFoundError') {
+        alert(
+          'No microphone was found. Please connect or enable a microphone and try again.'
+        )
+      } else {
+        alert(
+          'Could not access the microphone. Please check your Windows microphone settings and try again.'
+        )
+      }
+
+      finishVoiceInput()
+    }
+  }
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -707,7 +857,7 @@ function InputCard({
               'Solar panel',
               'Transformer',
               'Cement',
-              'More',
+              
             ].map(x => (
               <button
                 key={x}
@@ -825,9 +975,7 @@ function InputCard({
       <button
         className="mt-5 flex items-center gap-1 text-xs font-semibold text-[#2464a5] hover:underline"
       >
-        <SlidersHorizontal size={14} />
-        Advanced Options
-        <ChevronDown size={13} />
+        
       </button>
 
       <button
@@ -895,6 +1043,7 @@ function Results({
   saved,
   setSaved,
   onSave,
+  onReportGenerated,
   recommendations,
   queryText,
   searched,
@@ -903,6 +1052,7 @@ function Results({
   saved: boolean
   setSaved: (x: boolean) => void
   onSave: (standard: any) => void
+  onReportGenerated: (document: any) => void
   recommendations: any[]
   queryText: string
   searched: boolean
@@ -1355,10 +1505,21 @@ const downloadReport = () => {
     )
   }
 
-  // DIRECT PDF DOWNLOAD
-  doc.save(
-    `${standard.is_number || 'IS-SPEC-AI'}-Recommendation-Report.pdf`
-  )
+  // Save the generated PDF to My Documents and download it.
+  const fileName = `${standard.is_number || 'IS-SPEC-AI'}-Recommendation-Report.pdf`
+  const dataUri = doc.output('datauristring')
+
+  onReportGenerated({
+    id: `${Date.now()}-${standard.is_number || 'standard'}`,
+    fileName,
+    standardNumber: standard.is_number || 'N/A',
+    title: standard.title || 'Indian Standard Recommendation',
+    requirement: queryText || 'Not provided',
+    createdAt: new Date().toISOString(),
+    dataUri,
+  })
+
+  doc.save(fileName)
 }
   // -----------------------------
   // MAIN RESULTS UI
@@ -1932,6 +2093,7 @@ export default function Page() {
   const [queryText, setQueryText] = useState('')
   const [savedStandards, setSavedStandards] = useState<any[]>([])
   const [notificationMessage, setNotificationMessage] = useState('')
+  const [generatedDocuments, setGeneratedDocuments] = useState<any[]>([])
 
   useEffect(() => {
     try {
@@ -1944,6 +2106,14 @@ export default function Page() {
       }
 
       if (message) setNotificationMessage(message)
+
+      const documentData = localStorage.getItem('generatedDocuments')
+      if (documentData) {
+        const parsedDocuments = JSON.parse(documentData)
+        if (Array.isArray(parsedDocuments)) {
+          setGeneratedDocuments(parsedDocuments)
+        }
+      }
     } catch (error) {
       console.error('Failed to load saved data:', error)
     }
@@ -1973,6 +2143,46 @@ export default function Page() {
 
     localStorage.setItem('savedStandards', JSON.stringify(updated))
     localStorage.setItem('notificationMessage', message)
+  }
+
+  const handleReportGenerated = (document: any) => {
+    setGeneratedDocuments(prev => {
+      const withoutDuplicate = prev.filter(
+        item => item.id !== document.id
+      )
+      const updated = [document, ...withoutDuplicate].slice(0, 10)
+      localStorage.setItem('generatedDocuments', JSON.stringify(updated))
+      return updated
+    })
+  }
+
+  const openGeneratedPdf = async (dataUri: string) => {
+    try {
+      const response = await fetch(dataUri)
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const newWindow = window.open(blobUrl, '_blank')
+
+      if (!newWindow) {
+        URL.revokeObjectURL(blobUrl)
+        alert('Please allow pop-ups for localhost:3000 to open the PDF.')
+        return
+      }
+
+      // Keep the blob URL alive while the PDF viewer loads.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000)
+    } catch (error) {
+      console.error('Failed to open PDF:', error)
+      alert('Unable to open this PDF. Please use Download instead.')
+    }
+  }
+
+  const deleteDocument = (id: string) => {
+    setGeneratedDocuments(prev => {
+      const updated = prev.filter(document => document.id !== id)
+      localStorage.setItem('generatedDocuments', JSON.stringify(updated))
+      return updated
+    })
   }
 
   const title = useMemo(
@@ -2186,6 +2396,7 @@ export default function Page() {
                     saved={saved}
                     setSaved={setSaved}
                     onSave={handleSaveStandard}
+                    onReportGenerated={handleReportGenerated}
                     recommendations={recommendations}
                     queryText={queryText}
                     searched={searched}
@@ -2202,10 +2413,99 @@ export default function Page() {
               </div>
             </>
           ) : active === 'My Documents' ? (
-            <EmptyPage
-              title="My Documents"
-              icon={FolderOpen}
-            />
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
+                Workspace
+              </div>
+
+              <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-[#102b4d]">
+                    My Documents
+                  </h2>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Generated recommendation reports are saved here for future access.
+                  </p>
+                </div>
+
+                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-[#24539a]">
+                  {generatedDocuments.length} {generatedDocuments.length === 1 ? 'document' : 'documents'}
+                </span>
+              </div>
+
+              {generatedDocuments.length === 0 ? (
+                <div className="mt-6 rounded border border-dashed border-slate-300 bg-[#f8fbfe] p-10 text-center">
+                  <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-blue-50 text-[#1767aa]">
+                    <FolderOpen size={23} />
+                  </div>
+                  <div className="mt-4 text-sm font-semibold text-[#163b63]">
+                    No documents yet
+                  </div>
+                  <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-slate-500">
+                    Generate a Recommendation Report from a search. The PDF will automatically appear here.
+                  </p>
+                  <button
+                    onClick={() => setActive('New Search')}
+                    className="mt-4 rounded bg-[#1767aa] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#125a96]"
+                  >
+                    Open New Search
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-5 space-y-3">
+                  {generatedDocuments.map((document: any) => (
+                    <div
+                      key={document.id}
+                      className="rounded border border-slate-200 bg-white p-4 transition hover:border-blue-200 hover:bg-blue-50/20"
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded bg-red-50 text-red-600">
+                            <FileCheck2 size={19} />
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-bold text-[#133a67]">
+                              {document.fileName}
+                            </div>
+                            <div className="mt-1 text-[11px] text-slate-600">
+                              {document.standardNumber} — {document.title}
+                            </div>
+                            <div className="mt-1 text-[10px] text-slate-400">
+                              Generated {new Date(document.createdAt).toLocaleString('en-IN')}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex shrink-0 gap-2">
+                          <button
+                            onClick={() => openGeneratedPdf(document.dataUri)}
+                            className="rounded border border-slate-200 px-3 py-2 text-[11px] font-semibold text-slate-600 hover:bg-slate-50"
+                          >
+                            Open PDF
+                          </button>
+
+                          <a
+                            href={document.dataUri}
+                            download={document.fileName}
+                            className="rounded bg-[#1767aa] px-3 py-2 text-[11px] font-semibold text-white hover:bg-[#125a96]"
+                          >
+                            Download
+                          </a>
+
+                          <button
+                            onClick={() => deleteDocument(document.id)}
+                            className="rounded border border-red-100 px-3 py-2 text-[11px] font-semibold text-red-600 hover:bg-red-50"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : active === 'Saved Standards' ? (
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
               <div className="text-[11px] font-bold uppercase tracking-[.14em] text-[#3470b5]">
