@@ -1959,7 +1959,7 @@ export default function Page() {
 
     try {
       const response = await fetch(
-  'http://13.49.102.227:8000/api/recommend/',
+        '/api/recommend/',
         {
           method: 'POST',
           headers: {
@@ -2011,7 +2011,7 @@ export default function Page() {
     formData.append('file', file)
 
     const response = await fetch(
-      'http://13.49.102.227:8000/api/upload/pdf/recommend',
+      '/api/upload/pdf/recommend',
       {
         method: 'POST',
         body: formData,
